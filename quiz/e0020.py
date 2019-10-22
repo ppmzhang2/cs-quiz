@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Valid Parentheses
 
-https://github.com/azl397985856/leetcode
-
 Given a string containing just the characters '(', ')', '{', '}', '[' and ']',
 determine if the input string is valid.
 

@@ -30,6 +30,10 @@ class LL(NamedTuple):
                 break
             h, t = t.head, t.tail
 
+    def __reversed__(self):
+        for elem in reversed(tuple(self.__iter__())):
+            yield elem
+
     def __repr__(self):
         return reduce(lambda s1, s2: s1 + ' -> ' + s2,
                       chain(map(str, self.__iter__()), iter(('None', ))))
@@ -38,14 +42,18 @@ class LL(NamedTuple):
         return self.__repr__()
 
     @staticmethod
-    def compose(seq: Sequence[int, ...]) -> LL:
-        def helper(sq: Iterator[int, ...], rec: Union[LL, None]) -> LL:
-            rec_ = rec
-            for i in sq:
-                rec_ = LL(head=i, tail=rec_)
-            return rec_
+    def __reverse_compose(it: Iterator[int, ...], rec: Union[LL, None]) -> LL:
+        rec_ = rec
+        for i in it:
+            rec_ = LL(head=i, tail=rec_)
+        return rec_
 
-        return helper(reversed(seq), None)
+    @staticmethod
+    def compose(seq: Sequence[int, ...]) -> LL:
+        return LL.__reverse_compose(reversed(seq), None)
+
+    def reverse(self):
+        return LL.__reverse_compose(self.__iter__(), None)
 
     def solution(self, val):
         it = iter(self)

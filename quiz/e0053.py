@@ -24,26 +24,15 @@ class DP(object):
     Dynamic Programming
     """
     @staticmethod
-    def maxsum_endidx_tuple(arr: Union[List, Tuple]):
-        """
-
-        :param arr:
-        :return: tuple of maximum sum ending at every index
-        """
-        def helper(arr_: Union[List, Tuple], rec: Tuple) -> Tuple:
-            if not arr_:
-                return rec
-            if not rec:
-                curmax = arr_[0]
-            else:
-                curmax = max(rec[-1] + arr_[0], arr_[0])
-            return helper(arr_[1:], rec + (curmax, ))
-
-        return helper(arr, ())
+    def __gen_max_subarr(arr: Union[List, Tuple]):
+        res = arr[0]
+        for idx in range(1, len(arr)):
+            yield res
+            res = max(res + arr[idx], arr[idx])
 
     @staticmethod
-    def maxsum_subarr(arr: Union[List, Tuple]) -> int:
-        return max(DP.maxsum_endidx_tuple(arr))
+    def solution(arr: Union[List, Tuple]):
+        return max(DP.__gen_max_subarr(arr))
 
 
 class PS(object):
@@ -63,7 +52,7 @@ class PS(object):
         return helper(arr, ())
 
     @staticmethod
-    def maxsum_subarr(arr: Union[List, Tuple]) -> int:
+    def solution(arr: Union[List, Tuple]) -> int:
         arr_ps = PS.prefix_sum(arr)
         return max(arr_ps) - min(arr_ps)
 
@@ -72,8 +61,5 @@ if __name__ == '__main__':
     in1 = (-2, 1, -3, 4, -1, 2, 1, -5, 4)
     exp1 = 6
 
-    print(DP.maxsum_endidx_tuple(in1))
-    assert DP.maxsum_subarr(in1) == exp1
-
-    print(PS.prefix_sum(in1))
-    assert PS.maxsum_subarr(in1) == exp1
+    assert DP.solution(in1) == exp1
+    assert PS.solution(in1) == exp1

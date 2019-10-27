@@ -19,9 +19,9 @@ from itertools import chain
 from typing import Iterator, NamedTuple, Union
 
 
-class LL(NamedTuple):
+class LList(NamedTuple):
     head: int
-    tail: Union[LL, None] = None
+    tail: Union[LList, None] = None
 
     def __iter__(self):
         h = self.head
@@ -44,28 +44,32 @@ class LL(NamedTuple):
         return self.__repr__()
 
     @staticmethod
-    def __reverse_compose(it: Iterator[int, ...], rec: Union[LL, None]) -> LL:
+    def __reverse_compose(it: Iterator[int, ...],
+                          rec: Union[LList, None]) -> LList:
         rec_ = rec
         for i in it:
-            rec_ = LL(head=i, tail=rec_)
+            rec_ = LList(head=i, tail=rec_)
         return rec_
 
     @staticmethod
-    def compose(seq: Sequence[int, ...]) -> LL:
-        return LL.__reverse_compose(reversed(seq), None)
+    def compose(seq: Sequence[int, ...]) -> LList:
+        return LList.__reverse_compose(reversed(seq), None)
 
     def reverse(self):
-        return LL.__reverse_compose(self.__iter__(), None)
+        return LList.__reverse_compose(self.__iter__(), None)
 
 
 if __name__ == '__main__':
-    ll1 = LL(head=1,
-             tail=LL(head=2,
-                     tail=LL(head=6,
-                             tail=LL(head=3,
-                                     tail=LL(head=4,
-                                             tail=LL(head=5,
-                                                     tail=LL(head=6)))))))
+    ll1 = LList(head=1,
+                tail=LList(head=2,
+                           tail=LList(
+                               head=6,
+                               tail=LList(
+                                   head=3,
+                                   tail=LList(
+                                       head=4,
+                                       tail=LList(head=5,
+                                                  tail=LList(head=6)))))))
     exp1_rev = '6 -> 5 -> 4 -> 3 -> 6 -> 2 -> 1 -> None'
 
     assert exp1_rev == str(ll1.reverse())

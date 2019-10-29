@@ -86,3 +86,77 @@ class BTree(NamedTuple):
                 return helper(BTree.__bfs(tp), rec + 1)
 
         return helper((self, ), 0)
+
+
+class Tree(NamedTuple):
+    """
+    Immutable Tree
+    """
+    node: Any
+    children: Tuple[Tree, ...] = ()
+
+    @staticmethod
+    def __bfs(tp: Tuple[Tree, ...]) -> Tuple[Tree, ...]:
+        return reduce(
+            lambda x, y: x + tuple(
+                filter(lambda tr: tr is not None, y.children)), tp, ())
+
+    @staticmethod
+    def __dfs_pre(tp: Tuple[Tree, ...]) -> Tuple[Tree, ...]:
+        tr = tp[0]
+        return tuple(
+            filter(lambda t: t is not None,
+                   (Tree(node=tr.node), ) + tr.children)) + tp[1:]
+
+    @staticmethod
+    def __dfs_post(tp: Tuple[Tree, ...]) -> Tuple[Tree, ...]:
+        tr = tp[0]
+        return tuple(
+            filter(lambda t: t is not None,
+                   tr.children + (Tree(node=tr.node), ))) + tp[1:]
+
+    def bfs(self) -> Tuple[Any, ...]:
+        """Breadth-first search
+
+        :return:
+        """
+        def helper(tp: Tuple[Tree, ...],
+                   rec: Tuple[Any, ...]) -> Tuple[Any, ...]:
+            if not tp:
+                return rec
+            else:
+                rec_ = rec + tuple(i.node for i in tp)
+                return helper(Tree.__bfs(tp), rec_)
+
+        return helper((self, ), ())
+
+    def __dfs(self, cb):
+        def helper(tp: Tuple[Tree, ...],
+                   rec: Tuple[Any, ...]) -> Tuple[Any, ...]:
+            if not tp:
+                return rec
+            elif tp[0].children == ():
+                return helper(tp[1:], rec + (tp[0].node, ))
+            else:
+                return helper(cb(tp), rec)
+
+        return helper((self, ), ())
+
+    def dfs_pre(self) -> Tuple[Any, ...]:
+        return self.__dfs(Tree.__dfs_pre)
+
+    def dfs_post(self) -> Tuple[Any, ...]:
+        return self.__dfs(Tree.__dfs_post)
+
+    def depth(self) -> int:
+        """check binary tree depth with depth-first search
+
+        :return: tree depth
+        """
+        def helper(tp: Tuple[Tree, ...], rec: int) -> int:
+            if not tp:
+                return rec
+            else:
+                return helper(Tree.__bfs(tp), rec + 1)
+
+        return helper((self, ), 0)

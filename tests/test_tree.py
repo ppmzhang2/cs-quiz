@@ -1,21 +1,19 @@
 import unittest
-from utils.tree import ImmutableBTree as IBTree
+from adt.tree import BTree
 
 
 class TestBTree(unittest.TestCase):
-    ibt1 = IBTree(node=3,
-                  left=IBTree(node=9),
-                  right=IBTree(node=20,
-                               left=IBTree(node=15),
-                               right=IBTree(node=7)))
-    ibt2 = IBTree(node=1,
-                  left=IBTree(node=2, left=IBTree(node=3,
-                                                  left=IBTree(node=4))),
-                  right=IBTree(node=5,
-                               left=IBTree(node=6),
-                               right=IBTree(node=7,
-                                            left=IBTree(node=8),
-                                            right=IBTree(9))))
+    ibt1 = BTree(node=3,
+                 left=BTree(node=9),
+                 right=BTree(node=20, left=BTree(node=15),
+                             right=BTree(node=7)))
+    ibt2 = BTree(node=1,
+                 left=BTree(node=2, left=BTree(node=3, left=BTree(node=4))),
+                 right=BTree(node=5,
+                             left=BTree(node=6),
+                             right=BTree(node=7,
+                                         left=BTree(node=8),
+                                         right=BTree(9))))
 
     def test_depth(self):
         ibt1_depth = 3

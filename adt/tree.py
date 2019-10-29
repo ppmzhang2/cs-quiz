@@ -4,59 +4,57 @@ from functools import reduce
 from typing import Tuple, NamedTuple, Any
 
 
-class ImmutableBTree(NamedTuple):
+class BTree(NamedTuple):
     node: Any
-    left: ImmutableBTree = None
-    right: ImmutableBTree = None
+    left: BTree = None
+    right: BTree = None
     """
     tree traversal based methods
     """
     @staticmethod
-    def __bfs(tp: Tuple[ImmutableBTree, ...]) -> Tuple[ImmutableBTree, ...]:
+    def __bfs(tp: Tuple[BTree, ...]) -> Tuple[BTree, ...]:
         return reduce(
             lambda x, y: x + tuple(
                 filter(lambda tr: tr is not None, (y.left, y.right))), tp, ())
 
     @staticmethod
-    def __dfs_pre(tp: Tuple[ImmutableBTree, ...]
-                  ) -> Tuple[ImmutableBTree, ...]:
+    def __dfs_pre(tp: Tuple[BTree, ...]) -> Tuple[BTree, ...]:
         bt = tp[0]
         return tuple(
             filter(lambda tr: tr is not None,
-                   (ImmutableBTree(node=bt.node), bt.left, bt.right))) + tp[1:]
+                   (BTree(node=bt.node), bt.left, bt.right))) + tp[1:]
 
     @staticmethod
-    def __dfs_in(tp: Tuple[ImmutableBTree, ...]) -> Tuple[ImmutableBTree, ...]:
+    def __dfs_in(tp: Tuple[BTree, ...]) -> Tuple[BTree, ...]:
         bt = tp[0]
         return tuple(
             filter(lambda tr: tr is not None,
-                   (bt.left, ImmutableBTree(node=bt.node), bt.right))) + tp[1:]
+                   (bt.left, BTree(node=bt.node), bt.right))) + tp[1:]
 
     @staticmethod
-    def __dfs_post(tp: Tuple[ImmutableBTree, ...]
-                   ) -> Tuple[ImmutableBTree, ...]:
+    def __dfs_post(tp: Tuple[BTree, ...]) -> Tuple[BTree, ...]:
         bt = tp[0]
         return tuple(
             filter(lambda tr: tr is not None,
-                   (bt.left, bt.right, ImmutableBTree(node=bt.node)))) + tp[1:]
+                   (bt.left, bt.right, BTree(node=bt.node)))) + tp[1:]
 
     def bfs(self) -> Tuple[Any, ...]:
         """Breadth-first search
 
         :return:
         """
-        def helper(tp: Tuple[ImmutableBTree, ...],
+        def helper(tp: Tuple[BTree, ...],
                    rec: Tuple[Any, ...]) -> Tuple[Any, ...]:
             if not tp:
                 return rec
             else:
                 rec_ = rec + tuple(i.node for i in tp)
-                return helper(ImmutableBTree.__bfs(tp), rec_)
+                return helper(BTree.__bfs(tp), rec_)
 
         return helper((self, ), ())
 
     def __dfs(self, cb):
-        def helper(tp: Tuple[ImmutableBTree, ...],
+        def helper(tp: Tuple[BTree, ...],
                    rec: Tuple[Any, ...]) -> Tuple[Any, ...]:
             if not tp:
                 return rec
@@ -68,23 +66,23 @@ class ImmutableBTree(NamedTuple):
         return helper((self, ), ())
 
     def dfs_pre(self) -> Tuple[Any, ...]:
-        return self.__dfs(ImmutableBTree.__dfs_pre)
+        return self.__dfs(BTree.__dfs_pre)
 
     def dfs_in(self) -> Tuple[Any, ...]:
-        return self.__dfs(ImmutableBTree.__dfs_in)
+        return self.__dfs(BTree.__dfs_in)
 
     def dfs_post(self) -> Tuple[Any, ...]:
-        return self.__dfs(ImmutableBTree.__dfs_post)
+        return self.__dfs(BTree.__dfs_post)
 
     def depth(self) -> int:
         """check binary tree depth with depth-first search
 
         :return: tree depth
         """
-        def helper(tp: Tuple[ImmutableBTree, ...], rec: int) -> int:
+        def helper(tp: Tuple[BTree, ...], rec: int) -> int:
             if not tp:
                 return rec
             else:
-                return helper(ImmutableBTree.__bfs(tp), rec + 1)
+                return helper(BTree.__bfs(tp), rec + 1)
 
         return helper((self, ), 0)

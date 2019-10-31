@@ -44,9 +44,9 @@ class ZTree(NamedTuple):
         else:
             children = self.context.left_siblings + (
                 self.tree, ) + self.context.right_siblings
-            return ZTree(tree=Tree(node=self.context.parent_node,
-                                   children=children),
-                         context=self.context.parent_ctx)
+            return (type(self))(tree=Tree(node=self.context.parent_node,
+                                          children=children),
+                                context=self.context.parent_ctx)
 
     def go_down(self, left=True) -> ZTree:
         if self.bottom_most:
@@ -60,11 +60,11 @@ class ZTree(NamedTuple):
                 tr = self.tree.children[-1]
                 left_sibling = self.tree.children[:-1]
                 right_sibling = ()
-            return ZTree(tree=tr,
-                         context=Context(parent_node=self.tree.node,
-                                         parent_ctx=self.context,
-                                         left_siblings=left_sibling,
-                                         right_siblings=right_sibling))
+            return (type(self))(tree=tr,
+                                context=Context(parent_node=self.tree.node,
+                                                parent_ctx=self.context,
+                                                left_siblings=left_sibling,
+                                                right_siblings=right_sibling))
 
     def go_left(self) -> ZTree:
         if self.left_most:
@@ -73,11 +73,12 @@ class ZTree(NamedTuple):
             tr = self.context.left_siblings[-1]
             left_siblings = self.context.left_siblings[:-1]
             right_siblings = (self.tree, ) + self.context.right_siblings
-            return ZTree(tree=tr,
-                         context=Context(parent_node=self.context.parent_node,
-                                         parent_ctx=self.context.parent_ctx,
-                                         left_siblings=left_siblings,
-                                         right_siblings=right_siblings))
+            return (type(self))(tree=tr,
+                                context=Context(
+                                    parent_node=self.context.parent_node,
+                                    parent_ctx=self.context.parent_ctx,
+                                    left_siblings=left_siblings,
+                                    right_siblings=right_siblings))
 
     def go_right(self) -> ZTree:
         if self.right_most:
@@ -86,11 +87,12 @@ class ZTree(NamedTuple):
             tr = self.context.right_siblings[0]
             left_siblings = self.context.left_siblings + (self.tree, )
             right_siblings = self.context.right_siblings[1:]
-            return ZTree(tree=tr,
-                         context=Context(parent_node=self.context.parent_node,
-                                         parent_ctx=self.context.parent_ctx,
-                                         left_siblings=left_siblings,
-                                         right_siblings=right_siblings))
+            return (type(self))(tree=tr,
+                                context=Context(
+                                    parent_node=self.context.parent_node,
+                                    parent_ctx=self.context.parent_ctx,
+                                    left_siblings=left_siblings,
+                                    right_siblings=right_siblings))
 
     def go_top(self) -> ZTree:
         if self.top_most:

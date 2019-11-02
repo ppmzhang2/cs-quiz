@@ -5,34 +5,46 @@ from itertools import chain
 from adt.tree import Tree
 
 
-class Context(NamedTuple):
-    parent_node: Any
-    parent_ctx: Context = ()
-    left_siblings: Tuple[Optional[Tree], ...] = ()
-    right_siblings: Tuple[Optional[Tree], ...] = ()
+class Zipper(NamedTuple):
+    matl: Any
+    upper: Zipper
+
+
+class TreeZp(Zipper):
+    def __new__(cls,
+                upper_node: Any,
+                left_siblings=(),
+                right_siblings=(),
+                upper: TreeZp = ()):
+        matl: Tuple = tuple((upper_node, left_siblings, right_siblings))
+        self = super().__new__(cls, matl=matl, upper=upper)
+        self.upper_node = upper_node
+        self.left_siblings = left_siblings
+        self.right_siblings = right_siblings
+        return self
 
 
 class ZTree(NamedTuple):
     tree: Tree
-    context: Context = Context(parent_node=None,
-                               parent_ctx=(),
-                               left_siblings=(),
-                               right_siblings=())
+    zipper: TreeZp = TreeZp(upper_node=None,
+                            left_siblings=(),
+                            right_siblings=(),
+                            upper=())
 
     @property
     def top_most(self) -> bool:
-        return self.context == Context(parent_node=None,
-                                       parent_ctx=(),
-                                       left_siblings=(),
-                                       right_siblings=())
+        return self.zipper == TreeZp(upper_node=None,
+                                     left_siblings=(),
+                                     right_siblings=(),
+                                     upper=())
 
     @property
     def left_most(self) -> bool:
-        return self.context.left_siblings == ()
+        return self.zipper.left_siblings == ()
 
     @property
     def right_most(self) -> bool:
-        return self.context.right_siblings == ()
+        return self.zipper.right_siblings == ()
 
     @property
     def bottom_most(self) -> bool:
@@ -42,11 +54,11 @@ class ZTree(NamedTuple):
         if self.top_most:
             return self
         else:
-            children = self.context.left_siblings + (
-                self.tree, ) + self.context.right_siblings
-            return (type(self))(tree=Tree(node=self.context.parent_node,
+            children = self.zipper.left_siblings + (
+                self.tree, ) + self.zipper.right_siblings
+            return (type(self))(tree=Tree(node=self.zipper.upper_node,
                                           children=children),
-                                context=self.context.parent_ctx)
+                                zipper=self.zipper.upper)
 
     def go_down(self, left=True) -> ZTree:
         if self.bottom_most:
@@ -61,38 +73,38 @@ class ZTree(NamedTuple):
                 left_sibling = self.tree.children[:-1]
                 right_sibling = ()
             return (type(self))(tree=tr,
-                                context=Context(parent_node=self.tree.node,
-                                                parent_ctx=self.context,
-                                                left_siblings=left_sibling,
-                                                right_siblings=right_sibling))
+                                zipper=TreeZp(upper_node=self.tree.node,
+                                              left_siblings=left_sibling,
+                                              right_siblings=right_sibling,
+                                              upper=self.zipper))
 
     def go_left(self) -> ZTree:
         if self.left_most:
             return self
         else:
-            tr = self.context.left_siblings[-1]
-            left_siblings = self.context.left_siblings[:-1]
-            right_siblings = (self.tree, ) + self.context.right_siblings
+            tr = self.zipper.left_siblings[-1]
+            left_siblings = self.zipper.left_siblings[:-1]
+            right_siblings = (self.tree, ) + self.zipper.right_siblings
             return (type(self))(tree=tr,
-                                context=Context(
-                                    parent_node=self.context.parent_node,
-                                    parent_ctx=self.context.parent_ctx,
+                                zipper=TreeZp(
+                                    upper_node=self.zipper.upper_node,
                                     left_siblings=left_siblings,
-                                    right_siblings=right_siblings))
+                                    right_siblings=right_siblings,
+                                    upper=self.zipper.upper))
 
     def go_right(self) -> ZTree:
         if self.right_most:
             return self
         else:
-            tr = self.context.right_siblings[0]
-            left_siblings = self.context.left_siblings + (self.tree, )
-            right_siblings = self.context.right_siblings[1:]
+            tr = self.zipper.right_siblings[0]
+            left_siblings = self.zipper.left_siblings + (self.tree, )
+            right_siblings = self.zipper.right_siblings[1:]
             return (type(self))(tree=tr,
-                                context=Context(
-                                    parent_node=self.context.parent_node,
-                                    parent_ctx=self.context.parent_ctx,
+                                zipper=TreeZp(
+                                    upper_node=self.zipper.upper_node,
                                     left_siblings=left_siblings,
-                                    right_siblings=right_siblings))
+                                    right_siblings=right_siblings,
+                                    upper=self.zipper.upper))
 
     def go_top(self) -> ZTree:
         if self.top_most:

@@ -20,53 +20,34 @@ Explanation: The sum of 2 and 7 is 9. Therefore index1 = 1, index2 = 2.
 
 """
 
-from functools import reduce
-from collections import deque
-from math import inf
+from typing import Tuple
 
 
-class MinStack(object):
-    __slots__ = ['__stack', '__aux']
+class TwoSumSorted(object):
+    @staticmethod
+    def solution(arr: Tuple[int, ...], target: int):
+        def helper(arr_: Tuple[int, ...], target_: int, idx_beg: int,
+                   idx_end: int, rec: Tuple[Tuple[int, int], ...]):
+            if idx_beg >= idx_end:
+                return rec
+            elif arr[idx_beg] + arr[idx_end] < target:
+                return helper(arr_, target_, idx_beg + 1, idx_end, rec)
+            elif arr[idx_beg] + arr[idx_end] > target:
+                return helper(arr_, target_, idx_beg, idx_end - 1, rec)
+            else:
+                return helper(arr_, target_, idx_beg + 1, idx_end - 1,
+                              rec + ((idx_beg, idx_end), ))
 
-    def __init__(self):
-        self.__stack: deque = deque()
-        self.__aux: deque = deque()
-
-    def get_min(self):
-        try:
-            return self.__aux[-1]
-        except IndexError:
-            return inf
-
-    def push(self, e: int):
-        if e <= self.get_min():
-            self.__aux.append(e)
-        self.__stack.append(e)
-
-    def pop(self):
-        e = self.__stack.pop()
-        if e == self.get_min():
-            self.__aux.pop()
-        return e
-
-    def __str__(self):
-        return 'MinStack(' + reduce(lambda x, y: str(x) + ', ' + str(y),
-                                    self.__stack) + ')'
-
-    def __repr__(self):
-        return self.__str__()
+        return helper(arr, target, 0, len(arr) - 1, ())
 
 
 if __name__ == '__main__':
-    in1 = (-3, -4, -1, 5, -4, -20)
-    exp1_str = 'MinStack(-3, -4, -1, 5, -4, -20)'
-    exp1_min1 = -20
-    exp1_min2 = -4
-    exp1_pop1 = -20
+    in1_1 = (2, 7, 11, 15)
+    in1_2 = 9
+    in2_1 = (1, 2, 4, 5, 7, 8)
+    in2_2 = 9
+    exp1 = ((0, 1), )
+    exp2 = ((0, 5), (1, 4), (2, 3))
 
-    ms = MinStack()
-    list(map(lambda x: ms.push(x), in1))
-    assert str(ms) == exp1_str
-    assert ms.get_min() == exp1_min1
-    assert ms.pop() == exp1_pop1
-    assert ms.get_min() == exp1_min2
+    assert TwoSumSorted.solution(in1_1, in1_2) == exp1
+    assert TwoSumSorted.solution(in2_1, in2_2) == exp2

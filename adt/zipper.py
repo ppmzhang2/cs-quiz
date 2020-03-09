@@ -241,7 +241,7 @@ class ZipperCons(NamedTuple):
 
     @property
     def right_most(self):
-        if self.cons is None:
+        if self.cons.cdr is None:
             return True
         else:
             return False
@@ -277,4 +277,4 @@ class ZipperCons(NamedTuple):
             return self.go_left().go_left_most()
 
     def __len__(self):
-        return self.go_right_most().index
+        return self.go_right_most().index + 1

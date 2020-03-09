@@ -6,37 +6,37 @@ from adt.tree import Tree
 
 
 class Zipper(NamedTuple):
-    matl: Any
+    material: Any
     upper: Zipper
 
 
-class TreeZp(Zipper):
+class TreeZipper(Zipper):
     def __new__(cls,
                 upper_node: Any,
                 left_siblings=(),
                 right_siblings=(),
-                upper: TreeZp = ()):
-        matl: Tuple = tuple((upper_node, left_siblings, right_siblings))
-        self = super().__new__(cls, matl=matl, upper=upper)
+                upper: TreeZipper = ()):
+        material: Tuple = tuple((upper_node, left_siblings, right_siblings))
+        self = super().__new__(cls, material=material, upper=upper)
         self.upper_node = upper_node
         self.left_siblings = left_siblings
         self.right_siblings = right_siblings
         return self
 
 
-class ZTree(NamedTuple):
+class ZipperTree(NamedTuple):
     tree: Tree
-    zipper: TreeZp = TreeZp(upper_node=None,
-                            left_siblings=(),
-                            right_siblings=(),
-                            upper=())
+    zipper: TreeZipper = TreeZipper(upper_node=None,
+                                    left_siblings=(),
+                                    right_siblings=(),
+                                    upper=())
 
     @property
     def top_most(self) -> bool:
-        return self.zipper == TreeZp(upper_node=None,
-                                     left_siblings=(),
-                                     right_siblings=(),
-                                     upper=())
+        return self.zipper == TreeZipper(upper_node=None,
+                                         left_siblings=(),
+                                         right_siblings=(),
+                                         upper=())
 
     @property
     def left_most(self) -> bool:
@@ -50,7 +50,7 @@ class ZTree(NamedTuple):
     def bottom_most(self) -> bool:
         return self.tree.children == ()
 
-    def go_up(self) -> ZTree:
+    def go_up(self) -> ZipperTree:
         if self.top_most:
             return self
         else:
@@ -60,7 +60,7 @@ class ZTree(NamedTuple):
                                           children=children),
                                 zipper=self.zipper.upper)
 
-    def go_down(self, left=True) -> ZTree:
+    def go_down(self, left=True) -> ZipperTree:
         if self.bottom_most:
             return self
         else:
@@ -73,12 +73,12 @@ class ZTree(NamedTuple):
                 left_sibling = self.tree.children[:-1]
                 right_sibling = ()
             return (type(self))(tree=tr,
-                                zipper=TreeZp(upper_node=self.tree.node,
-                                              left_siblings=left_sibling,
-                                              right_siblings=right_sibling,
-                                              upper=self.zipper))
+                                zipper=TreeZipper(upper_node=self.tree.node,
+                                                  left_siblings=left_sibling,
+                                                  right_siblings=right_sibling,
+                                                  upper=self.zipper))
 
-    def go_left(self) -> ZTree:
+    def go_left(self) -> ZipperTree:
         if self.left_most:
             return self
         else:
@@ -86,13 +86,13 @@ class ZTree(NamedTuple):
             left_siblings = self.zipper.left_siblings[:-1]
             right_siblings = (self.tree, ) + self.zipper.right_siblings
             return (type(self))(tree=tr,
-                                zipper=TreeZp(
+                                zipper=TreeZipper(
                                     upper_node=self.zipper.upper_node,
                                     left_siblings=left_siblings,
                                     right_siblings=right_siblings,
                                     upper=self.zipper.upper))
 
-    def go_right(self) -> ZTree:
+    def go_right(self) -> ZipperTree:
         if self.right_most:
             return self
         else:
@@ -100,32 +100,32 @@ class ZTree(NamedTuple):
             left_siblings = self.zipper.left_siblings + (self.tree, )
             right_siblings = self.zipper.right_siblings[1:]
             return (type(self))(tree=tr,
-                                zipper=TreeZp(
+                                zipper=TreeZipper(
                                     upper_node=self.zipper.upper_node,
                                     left_siblings=left_siblings,
                                     right_siblings=right_siblings,
                                     upper=self.zipper.upper))
 
-    def go_top(self) -> ZTree:
+    def go_top(self) -> ZipperTree:
         if self.top_most:
             return self
         else:
             return self.go_up().go_top()
 
-    def go_bottom(self, left=True) -> ZTree:
+    def go_bottom(self, left=True) -> ZipperTree:
         if self.bottom_most and ((left and self.left_most) or
                                  (not left and self.right_most)):
             return self
         else:
             return self.go_down(left=left).go_bottom(left=left)
 
-    def go_bottomleft(self) -> ZTree:
+    def go_bottomleft(self) -> ZipperTree:
         return self.go_top().go_bottom(left=True)
 
-    def go_bottomright(self) -> ZTree:
+    def go_bottomright(self) -> ZipperTree:
         return self.go_top().go_bottom(left=False)
 
-    def dfs_pre(self) -> Generator[ZTree]:
+    def dfs_pre(self) -> Generator[ZipperTree]:
         """pre-order deep first search
 
         0. start from top
@@ -154,7 +154,7 @@ class ZTree(NamedTuple):
             else:
                 tr = tr.go_down(left=True)
 
-    def dfs_post(self) -> Generator[ZTree]:
+    def dfs_post(self) -> Generator[ZipperTree]:
         """post-order deep first search
 
         0. start from bottom-left most
@@ -179,7 +179,7 @@ class ZTree(NamedTuple):
             else:
                 tr = tr.go_right().go_bottom(left=True)
 
-    def child_iter(self) -> Generator[Optional[ZTree], ...]:
+    def child_iter(self) -> Generator[Optional[ZipperTree], ...]:
         """iterate over its children
 
         :return:
@@ -196,15 +196,15 @@ class ZTree(NamedTuple):
                     tr = tr.go_right()
 
     @staticmethod
-    def __mul_child_iter(itr: Generator[Optional[ZTree], ...]
-                         ) -> Generator[Optional[ZTree], ...]:
+    def __mul_child_iter(itr: Generator[Optional[ZipperTree], ...]
+                         ) -> Generator[Optional[ZipperTree], ...]:
         return filter(lambda x: x is not None,
                       chain(*(zt.child_iter() for zt in itr)))
 
-    def bfs(self) -> Generator[Optional[ZTree], ...]:
-        def helper(tp: Tuple[Optional[ZTree], ...],
-                   rec: Generator[Optional[ZTree], ...]):
-            tp_ = tuple(ZTree.__mul_child_iter(iter(tp)))
+    def bfs(self) -> Generator[Optional[ZipperTree], ...]:
+        def helper(tp: Tuple[Optional[ZipperTree], ...],
+                   rec: Generator[Optional[ZipperTree], ...]):
+            tp_ = tuple(ZipperTree.__mul_child_iter(iter(tp)))
             if not tp_:
                 return rec
             else:

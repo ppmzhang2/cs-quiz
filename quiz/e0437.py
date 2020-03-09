@@ -34,7 +34,7 @@ from __future__ import annotations
 from functools import reduce
 from typing import Generator, Optional, Tuple
 from adt.tree import Tree
-from adt.zipper import ZTree
+from adt.zipper import ZipperTree
 
 
 class PS(object):
@@ -69,14 +69,15 @@ class PS(object):
         return prefix_sums(PS.prefix_sum(arr), target)
 
 
-class NewZTree(ZTree):
+class NewZipperTree(ZipperTree):
     def __new__(cls, *args, **kwargs):
         return super().__new__(cls, *args, **kwargs)
 
-    def bottom_iter(self) -> Generator[Optional[NewZTree]]:
-        return filter(lambda t: t.bottom_most, super(NewZTree, self).bfs())
+    def bottom_iter(self) -> Generator[Optional[NewZipperTree]]:
+        return filter(lambda t: t.bottom_most,
+                      super(NewZipperTree, self).bfs())
 
-    def path_iter(self) -> Generator[Optional[NewZTree]]:
+    def path_iter(self) -> Generator[Optional[NewZipperTree]]:
         t = self
         while True:
             yield t
@@ -85,7 +86,8 @@ class NewZTree(ZTree):
             else:
                 t = t.go_up()
 
-    def paths_iter(self) -> Generator[Optional[Generator[Optional[NewZTree]]]]:
+    def paths_iter(
+            self) -> Generator[Optional[Generator[Optional[NewZipperTree]]]]:
         bottoms = self.bottom_iter()
         return (tr.path_iter() for tr in bottoms)
 
@@ -103,7 +105,7 @@ if __name__ == '__main__':
                                        children=(Tree(node=9), Tree(node=10),
                                                  Tree(node=11))), )),
                ))
-    zt1 = NewZTree(tree=tr1)
+    zt1 = NewZipperTree(tree=tr1)
 
     # for i in zt1.bottom_iter():
     #     print(type(i))

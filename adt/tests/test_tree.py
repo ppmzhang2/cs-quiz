@@ -34,7 +34,7 @@ Tree1:
 
 import unittest
 from adt.tree import BTree, Tree
-from adt.zipper import ZTree
+from adt.zipper import ZipperTree
 
 
 class TreeTest(unittest.TestCase):
@@ -61,7 +61,7 @@ class TreeTest(unittest.TestCase):
                              right=BTree(node=7,
                                          left=BTree(node=8),
                                          right=BTree(9))))
-    zt1 = ZTree(tree=tr1)
+    zt1 = ZipperTree(tree=tr1)
     ibt1_depth = 3
     ibt2_depth = 4
     ibt2_bfs = (1, 2, 5, 3, 6, 7, 4, 8, 9)
@@ -86,7 +86,7 @@ class TreeTest(unittest.TestCase):
         self.assertEqual(self.tr1_dfs_post, self.tr1.dfs_post())
 
     def test_ztree(self):
-        zt1 = ZTree(tree=self.tr1)
+        zt1 = ZipperTree(tree=self.tr1)
         zt1_bfs = tuple(t.tree.node for t in zt1.bfs())
         zt1_dfs_pre = tuple(t.tree.node for t in zt1.dfs_pre())
         zt1_dfs_post = tuple(t.tree.node for t in zt1.dfs_post())

@@ -2,6 +2,8 @@
 from __future__ import annotations
 from typing import Tuple, NamedTuple, Any, Optional, Generator
 from itertools import chain
+
+from adt.cons import Cons
 from adt.tree import Tree
 
 
@@ -211,3 +213,68 @@ class ZipperTree(NamedTuple):
                 return helper(tp_, chain(rec, tp_))
 
         return helper((self, ), iter((self, )))
+
+
+class ConsZipper(Zipper):
+    def __new__(cls, material: Any = None, upper: ConsZipper = None):
+        self = super().__new__(cls, material=material, upper=upper)
+        return self
+
+
+class ZipperCons(NamedTuple):
+    cons: Cons
+    zipper: ConsZipper
+    index: int = 0
+
+    @classmethod
+    def from_cons(cls, cons: Cons):
+        return cls(cons=cons,
+                   zipper=ConsZipper(material=None, upper=None),
+                   index=0)
+
+    @property
+    def left_most(self):
+        if self.index == 0:
+            return True
+        else:
+            return False
+
+    @property
+    def right_most(self):
+        if self.cons is None:
+            return True
+        else:
+            return False
+
+    def go_right(self):
+        if self.right_most:
+            return self
+        else:
+            return type(self)(cons=self.cons.cdr,
+                              zipper=ConsZipper(material=self.cons.car,
+                                                upper=self.zipper),
+                              index=self.index + 1)
+
+    def go_left(self):
+        if self.left_most:
+            return self
+        else:
+            return type(self)(cons=Cons(car=self.zipper.material,
+                                        cdr=self.cons),
+                              zipper=self.zipper.upper,
+                              index=self.index - 1)
+
+    def go_right_most(self):
+        if self.right_most:
+            return self
+        else:
+            return self.go_right().go_right_most()
+
+    def go_left_most(self):
+        if self.left_most:
+            return self
+        else:
+            return self.go_left().go_left_most()
+
+    def __len__(self):
+        return self.go_right_most().index

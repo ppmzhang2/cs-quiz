@@ -278,3 +278,30 @@ class ZipperCons(NamedTuple):
 
     def __len__(self):
         return self.go_right_most().index + 1
+
+    def __get_item_int(self, item: int, reverse=False):
+        if item < 0 and not reverse:
+            return self.go_right_most().__get_item_int(item + 1, True)
+        elif item > 0 and not reverse:
+            if item == 0:
+                return self.go_left_most().cons.car
+            elif self.right_most:
+                raise IndexError("Index out of range")
+            else:
+                return self.go_right().__get_item_int(item - 1)
+        else:
+            if item == 0:
+                return self.cons.car
+            elif self.left_most:
+                raise IndexError("Index out of range")
+            else:
+                return self.go_left().__get_item_int(item + 1, reverse)
+
+    def __getitem__(self, item):
+        if isinstance(item, slice):
+            return Cons.constr((self.__get_item_int(i)
+                                for i in range(*item.indices(self.__len__()))))
+        elif isinstance(item, int):
+            return self.__get_item_int(item)
+        else:
+            raise TypeError("Invalid argument type")

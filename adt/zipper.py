@@ -305,3 +305,18 @@ class ZipperCons(NamedTuple):
             return self.__get_item_int(item)
         else:
             raise TypeError("Invalid argument type")
+
+    def __add__(self, other) -> ZipperCons:
+        if isinstance(other, ZipperCons):
+            left = self.go_right_most()
+            right = other.go_left_most()
+            return type(self)(cons=Cons(car=left.cons.car, cdr=right.cons),
+                              zipper=left.zipper,
+                              index=left.index)
+        elif isinstance(other, Cons):
+            left = self.go_right_most()
+            return type(self)(cons=Cons(car=left.cons.car, cdr=other),
+                              zipper=left.zipper,
+                              index=left.index)
+        else:
+            raise TypeError("Invalid argument type")

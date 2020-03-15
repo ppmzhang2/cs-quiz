@@ -44,6 +44,8 @@ class ZipperConsTest(unittest.TestCase):
                 cdr=Cons(car=2, cdr=Cons(car=3, cdr=Cons(car=4, cdr=None))))
     len_cons = 4
     cons_slice = Cons(car=4, cdr=Cons(car=2, cdr=None))
+    cons2 = Cons(car=5,
+                 cdr=Cons(car=6, cdr=Cons(car=7, cdr=Cons(car=8, cdr=None))))
 
     def test_zipper_tree(self):
         zt = ZipperTree(tree=self.tr)
@@ -68,6 +70,10 @@ class ZipperConsTest(unittest.TestCase):
             zc1[4]
         with self.assertRaises(IndexError):
             zc1[-5]
+        zc_other = ZipperCons.from_cons(cons=self.cons2)
+        zc5 = zc1 + self.cons2
+        zc6 = zc1 + zc_other
+        self.assertEqual(zc5.go_left_most().cons, zc6.go_left_most().cons)
 
 
 if __name__ == '__main__':

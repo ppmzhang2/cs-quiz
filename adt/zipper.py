@@ -228,9 +228,7 @@ class ZipperCons(NamedTuple):
 
     @classmethod
     def from_cons(cls, cons: Cons):
-        return cls(cons=cons,
-                   zipper=ConsZipper(material=None, upper=None),
-                   index=0)
+        return cls(cons=cons, zipper=None, index=0)
 
     @property
     def left_most(self):

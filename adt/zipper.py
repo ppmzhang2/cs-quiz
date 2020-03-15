@@ -44,17 +44,11 @@ class TreeZipper(Zipper):
 
 class ZipperTree(NamedTuple):
     tree: Tree
-    zipper: TreeZipper = TreeZipper(upper_node=None,
-                                    left_siblings=(),
-                                    right_siblings=(),
-                                    upper=())
+    zipper: TreeZipper = None
 
     @property
     def top_most(self) -> bool:
-        return self.zipper == TreeZipper(upper_node=None,
-                                         left_siblings=(),
-                                         right_siblings=(),
-                                         upper=())
+        return self.zipper is None
 
     @property
     def left_most(self) -> bool:

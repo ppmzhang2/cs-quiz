@@ -11,6 +11,22 @@ class Zipper(NamedTuple):
     material: Any
     upper: Zipper
 
+    def __str__(self):
+        def helper(material: Any, upper: ConsZipper,
+                   rec: Tuple[Any, ...]) -> Tuple[Any, ...]:
+            if upper is None:
+                return (material, ) + rec
+            else:
+                return helper(upper.material, upper.upper, (material, ) + rec)
+
+        if self is None:
+            return ().__str__()
+        else:
+            return helper(self.material, self.upper, ()).__str__()
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class TreeZipper(Zipper):
     def __new__(cls,

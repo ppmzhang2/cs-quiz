@@ -48,7 +48,7 @@ class ZipperConsTest(unittest.TestCase):
                  cdr=Cons(car=6, cdr=Cons(car=7, cdr=Cons(car=8, cdr=None))))
 
     def test_zipper_tree(self):
-        zt = ZipperTree(tree=self.tr)
+        zt = ZipperTree.from_tree(self.tr)
         zt_bfs = tuple(t.tree.node for t in zt.bfs())
         zt_dfs_pre = tuple(t.tree.node for t in zt.dfs_pre())
         zt_dfs_post = tuple(t.tree.node for t in zt.dfs_post())

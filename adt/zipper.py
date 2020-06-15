@@ -46,6 +46,10 @@ class ZipperTree(NamedTuple):
     tree: Tree
     zipper: TreeZipper = None
 
+    @classmethod
+    def from_tree(cls, tree: Tree):
+        return cls(tree=tree, zipper=None)
+
     @property
     def top_most(self) -> bool:
         return self.zipper is None

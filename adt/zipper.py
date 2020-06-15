@@ -11,6 +11,22 @@ class Zipper(NamedTuple):
     material: Any
     upper: Zipper
 
+    def __str__(self):
+        def helper(material: Any, upper: ConsZipper,
+                   rec: Tuple[Any, ...]) -> Tuple[Any, ...]:
+            if upper is None:
+                return (material, ) + rec
+            else:
+                return helper(upper.material, upper.upper, (material, ) + rec)
+
+        if self is None:
+            return ().__str__()
+        else:
+            return helper(self.material, self.upper, ()).__str__()
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class TreeZipper(Zipper):
     def __new__(cls,
@@ -28,17 +44,15 @@ class TreeZipper(Zipper):
 
 class ZipperTree(NamedTuple):
     tree: Tree
-    zipper: TreeZipper = TreeZipper(upper_node=None,
-                                    left_siblings=(),
-                                    right_siblings=(),
-                                    upper=())
+    zipper: TreeZipper = None
+
+    @classmethod
+    def from_tree(cls, tree: Tree):
+        return cls(tree=tree, zipper=None)
 
     @property
     def top_most(self) -> bool:
-        return self.zipper == TreeZipper(upper_node=None,
-                                         left_siblings=(),
-                                         right_siblings=(),
-                                         upper=())
+        return self.zipper is None
 
     @property
     def left_most(self) -> bool:
@@ -228,9 +242,7 @@ class ZipperCons(NamedTuple):
 
     @classmethod
     def from_cons(cls, cons: Cons):
-        return cls(cons=cons,
-                   zipper=ConsZipper(material=None, upper=None),
-                   index=0)
+        return cls(cons=cons, zipper=None, index=0)
 
     @property
     def left_most(self):

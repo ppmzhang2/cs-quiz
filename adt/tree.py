@@ -106,24 +106,9 @@ class BTree(Tree):
         self.right = right
         return self
 
-    @staticmethod
-    def __dfs_in(tp: Tuple[BTree, ...]) -> Tuple[BTree, ...]:
-        bt = tp[0]
-        return tuple(
-            filter(lambda tr: tr is not None,
-                   (bt.left, BTree(node=bt.node), bt.right))) + tp[1:]
-
-    def __dfs(self, cb):
-        def helper(tp: Tuple[BTree, ...],
-                   rec: Tuple[Any, ...]) -> Tuple[Any, ...]:
-            if not tp:
-                return rec
-            elif tp[0].left is None and tp[0].right is None:
-                return helper(tp[1:], rec + (tp[0].node, ))
-            else:
-                return helper(cb(tp), rec)
-
-        return helper((self, ), ())
-
     def dfs_in(self) -> Tuple[Any, ...]:
-        return self.__dfs(BTree.__dfs_in)
+        def callback(tree: BTree):
+            return filter(lambda t: t is not None,
+                          (tree.right, BTree(node=tree.node), tree.left))
+
+        return self._dfs_helper(Stack((self, )), (), callback)

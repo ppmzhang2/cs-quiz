@@ -36,7 +36,7 @@ class Stack(object):
         if self.empty():
             raise EmptyStackException('Stack is empty!')
 
-    def push(self, e: int):
+    def push(self, e):
         self.__stack.append(e)
 
     def peak(self):

@@ -70,13 +70,15 @@ class Tree(NamedTuple):
 
     def dfs_pre(self) -> Tuple[Any, ...]:
         def callback(tree: Tree):
-            return chain(reversed(tree.children), (Tree(node=tree.node), ))
+            return chain(reversed(tree.children),
+                         (type(self)(node=tree.node), ))
 
         return self._dfs_helper(Stack((self, )), (), callback)
 
     def dfs_post(self) -> Tuple[Any, ...]:
         def callback(tree: Tree):
-            return chain((Tree(node=tree.node), ), reversed(tree.children))
+            return chain((type(self)(node=tree.node), ),
+                         reversed(tree.children))
 
         return self._dfs_helper(Stack((self, )), (), callback)
 
@@ -109,6 +111,6 @@ class BTree(Tree):
     def dfs_in(self) -> Tuple[Any, ...]:
         def callback(tree: BTree):
             return filter(lambda t: t is not None,
-                          (tree.right, BTree(node=tree.node), tree.left))
+                          (tree.right, type(self)(node=tree.node), tree.left))
 
         return self._dfs_helper(Stack((self, )), (), callback)

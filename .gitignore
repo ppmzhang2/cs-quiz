@@ -54,3 +54,4 @@ venv
 *.pid.lock
 
 .idea/
+.vscode/

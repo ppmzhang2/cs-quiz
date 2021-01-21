@@ -45,3 +45,127 @@ Constraints:
 * 1 <= s.length <= 100
 * s contains only digits and may contain leading zero(s).
 """
+from __future__ import annotations
+
+from enum import Enum
+from typing import NamedTuple, Optional, Sequence
+
+
+class Code(Enum):
+    A = '1'
+    B = '2'
+    C = '3'
+    D = '4'
+    E = '5'
+    F = '6'
+    G = '7'
+    H = '8'
+    I = '9'
+    J = '10'
+    K = '11'
+    L = '12'
+    M = '13'
+    N = '14'
+    O = '15'
+    P = '16'
+    Q = '17'
+    R = '18'
+    S = '19'
+    T = '20'
+    U = '21'
+    V = '22'
+    W = '23'
+    X = '24'
+    Y = '25'
+    Z = '26'
+
+
+class Status(Enum):
+    DOING = 1
+    ONE = 2
+    DONE = 3
+    INVALID = 4
+
+
+class FSM(NamedTuple):
+    ciphers: str
+    codes: Sequence[Code]
+
+    @property
+    def remaining(self) -> int:
+        return len(self.ciphers)
+
+    @property
+    def invalid(self):
+        if len(list(filter(lambda x: x is None, self.codes))) >= 1:
+            return True
+        return False
+
+    @property
+    def status(self):
+        if self.invalid:
+            return Status.INVALID
+        if self.remaining == 0:
+            return Status.DONE
+        if self.remaining == 1:
+            return Status.ONE
+        return Status.DOING
+
+
+class Decode:
+    @staticmethod
+    def decipher(cipher: str) -> Optional[Code]:
+        try:
+            return Code(cipher)
+        except ValueError:
+            return None
+
+    @classmethod
+    def explode(cls, fsm: FSM) -> Sequence[FSM]:
+        assert fsm.status in (Status.DOING, Status.ONE)
+
+        if fsm.status == Status.ONE:
+            return (FSM('', (*fsm.codes, cls.decipher(fsm.ciphers))), )
+
+        splits = (
+            (fsm.ciphers[1:], fsm.ciphers[:1]),
+            (fsm.ciphers[2:], fsm.ciphers[:2]),
+        )
+        return tuple(
+            FSM(tp[0], (*fsm.codes, cls.decipher(tp[1]))) for tp in splits)
+
+    @classmethod
+    def looper(cls, inputs: Sequence[FSM],
+               outputs: Sequence[FSM]) -> Sequence[FSM]:
+        if not inputs:
+            return outputs
+        fsm = inputs[0]
+        if fsm.status == Status.INVALID:
+            return cls.looper(inputs[1:], outputs)
+        if fsm.status == Status.DONE:
+            return cls.looper(inputs[1:], (*outputs, fsm))
+        return cls.looper((*inputs[1:], *cls.explode(fsm)), outputs)
+
+    def solution(self, text: str):
+        fsm_seq = self.looper((FSM(text, ()), ), ())
+        return len(fsm_seq)
+
+
+if __name__ == '__main__':
+    ipt_1 = '12'
+    exp_1 = 2
+    ipt_2 = '226'
+    exp_2 = 3
+    ipt_3 = '0'
+    exp_3 = 0
+    ipt_4 = '1'
+    exp_4 = 1
+
+    decode = Decode()
+
+    # print(decode.explode(FSM(ipt_1, ())))
+
+    assert decode.solution(ipt_1) == exp_1
+    assert decode.solution(ipt_2) == exp_2
+    assert decode.solution(ipt_3) == exp_3
+    assert decode.solution(ipt_4) == exp_4

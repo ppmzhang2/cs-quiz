@@ -18,3 +18,68 @@ Constraints:
 * -10 <= nums[i] <= 10
 * All the numbers of nums are unique.
 """
+from __future__ import annotations
+
+from enum import Enum
+from typing import NamedTuple, Sequence, Tuple
+
+
+class Status(Enum):
+    DOING = 0
+    DONE = 1
+
+
+class FSM(NamedTuple):
+    subsets: Sequence[Sequence[int]]
+    elements: Sequence[int]
+
+    @property
+    def status(self):
+        if not self.elements:
+            return Status.DONE
+        return Status.DOING
+
+    def transform(self) -> FSM:
+        assert self.status == Status.DOING
+        element = self.elements[0]
+        additional_sets = tuple(
+            (*subset, element) for _, subset in enumerate(self.subsets))
+        return FSM((*self.subsets, *additional_sets), self.elements[1:])
+
+
+class Subsets:
+    @classmethod
+    def looper(cls, fsm: FSM) -> FSM:
+        if fsm.status == Status.DONE:
+            return fsm
+        return cls.looper(fsm.transform())
+
+    def solution(self, nums: Sequence[int]) -> Tuple[Tuple[int, ...], ...]:
+        fsm = FSM((), ), nums)
+        return tuple(sorted(self.looper(fsm).subsets))
+
+
+if __name__ == '__main__':
+    ipt_1 = [1, 2]
+    exp_1 = (
+        (),
+        (1, ),
+        (1, 2),
+        (2, ),
+    )
+    ipt_2 = [1, 2, 3]
+    exp_2 = (
+        (),
+        (1, ),
+        (1, 2),
+        (1, 2, 3),
+        (1, 3),
+        (2, ),
+        (2, 3),
+        (3, ),
+    )
+
+    s = Subsets()
+
+    assert s.solution(ipt_1) == exp_1
+    assert s.solution(ipt_2) == exp_2

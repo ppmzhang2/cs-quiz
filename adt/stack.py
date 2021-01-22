@@ -1,15 +1,13 @@
-# -*- coding: utf-8 -*-
-
-from functools import reduce
 from collections import deque
-from typing import Iterable, Optional, Any
+from functools import reduce
+from typing import Any, Iterable, Optional
 
 
 class EmptyStackException(Exception):
     pass
 
 
-class Stack(object):
+class Stack:
     __slots__ = ['__stack']
 
     def __init__(self, arr: Iterable[Optional[Any]] = ()):
@@ -29,8 +27,7 @@ class Stack(object):
     def empty(self) -> bool:
         if self.__len__() == 0:
             return True
-        else:
-            return False
+        return False
 
     def __empty_exception(self):
         if self.empty():
@@ -51,9 +48,8 @@ class Stack(object):
     def __str__(self):
         if self.empty():
             return 'Stack([])'
-        else:
-            return 'Stack([' + reduce(lambda x, y: x + ', ' + y,
-                                      map(str, self.__stack)) + '])'
+        return 'Stack([' + reduce(lambda x, y: x + ', ' + y,
+                                  map(str, self.__stack)) + '])'
 
     def __repr__(self):
         return self.__str__()

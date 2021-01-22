@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 """test for ADT.cons
 
 """
 
 import unittest
+
 from adt.cons import Cons
 
 

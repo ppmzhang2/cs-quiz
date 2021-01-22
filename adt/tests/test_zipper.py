@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """test for ADT.zipper
 Test Cases:
 

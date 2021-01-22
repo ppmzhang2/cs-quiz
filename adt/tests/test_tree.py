@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """test for ADT.tree
 Test Cases:
 
@@ -33,6 +32,7 @@ Tree1:
 """
 
 import unittest
+
 from adt.tree import BTree, Tree
 
 

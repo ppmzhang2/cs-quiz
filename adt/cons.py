@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 from __future__ import annotations
+
 from functools import reduce
-from typing import Tuple, NamedTuple, Any, Optional, Iterator, Iterable
+from typing import Any, Iterator, NamedTuple
 
 
 class Cons(NamedTuple):

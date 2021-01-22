@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 from functools import reduce
 from itertools import chain
-from typing import Any, Callable, Iterable, List, NamedTuple, Optional, Tuple
+from typing import Any, Callable, Iterable, NamedTuple, Optional, Tuple
 
 from adt.stack import Stack
 
@@ -58,13 +57,12 @@ class Tree(NamedTuple):
 
         :return:
         """
-        def helper(tp: Tuple[Tree, ...],
-                   rec: Tuple[Any, ...]) -> Tuple[Any, ...]:
+        def helper(tp: Tuple[Tree, ...], rec: Tuple[Any,
+                                                    ...]) -> Tuple[Any, ...]:
             if not tp:
                 return rec
-            else:
-                rec_ = rec + tuple(i.node for i in tp)
-                return helper(Tree.__bfs(tp), rec_)
+            rec_ = rec + tuple(i.node for i in tp)
+            return helper(Tree.__bfs(tp), rec_)
 
         return helper((self, ), ())
 
@@ -90,8 +88,7 @@ class Tree(NamedTuple):
         def helper(tp: Tuple[Tree, ...], rec: int) -> int:
             if not tp:
                 return rec
-            else:
-                return helper(Tree.__bfs(tp), rec + 1)
+            return helper(Tree.__bfs(tp), rec + 1)
 
         return helper((self, ), 0)
 

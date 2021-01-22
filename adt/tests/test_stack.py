@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 """test for adt.stack
 
 """
 
 import unittest
+
 from adt.stack import Stack
 
 
@@ -57,9 +57,9 @@ class StackTest(unittest.TestCase):
         stk1_iter = []
         stk2_iter = [1]
         stk3_iter = ['c', 'b', 'a']
-        self.assertEqual([i for i in iter(stk1)], stk1_iter)
-        self.assertEqual([i for i in iter(stk2)], stk2_iter)
-        self.assertEqual([i for i in iter(stk3)], stk3_iter)
+        self.assertEqual(list(iter(stk1)), stk1_iter)
+        self.assertEqual(list(iter(stk2)), stk2_iter)
+        self.assertEqual(list(iter(stk3)), stk3_iter)
         self.assertEqual(True, stk1.empty())
         self.assertEqual(True, stk2.empty())
         self.assertEqual(True, stk3.empty())

@@ -1,6 +1,8 @@
 from collections import deque
 from functools import reduce
-from typing import Any, Iterable, Optional
+from typing import Optional, Sequence, TypeVar
+
+T = TypeVar('T')
 
 
 class EmptyStackException(Exception):
@@ -10,10 +12,10 @@ class EmptyStackException(Exception):
 class Stack:
     __slots__ = ['__stack']
 
-    def __init__(self, arr: Iterable[Optional[Any]] = ()):
+    def __init__(self, arr: Sequence[Optional[T]] = ()):
         self.__stack: deque = deque(arr)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.__stack)
 
     def __iter__(self):
@@ -36,11 +38,11 @@ class Stack:
     def push(self, e):
         self.__stack.append(e)
 
-    def peak(self):
+    def peak(self) -> T:
         self.__empty_exception()
         return self.__stack[-1]
 
-    def pop(self):
+    def pop(self) -> T:
         self.__empty_exception()
         e = self.__stack.pop()
         return e

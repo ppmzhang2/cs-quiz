@@ -57,9 +57,9 @@ class ZipperConsTest(unittest.TestCase):
 
     def test_zipper_cons(self):
         zc1 = ZipperCons.from_cons(cons=self.cons)
-        zc2 = zc1.go_right().go_left()
-        zc3 = zc1.go_right().go_right().go_left().go_left()
-        zc4 = zc1.go_right_most().go_left_most()
+        zc2 = zc1.go_down().go_up()
+        zc3 = zc1.go_down().go_down().go_up().go_up()
+        zc4 = zc1.go_down_most().go_up_most()
         self.assertEqual(zc1, zc2)
         self.assertEqual(zc1, zc3)
         self.assertEqual(zc1, zc4)
@@ -72,7 +72,7 @@ class ZipperConsTest(unittest.TestCase):
         zc_other = ZipperCons.from_cons(cons=self.cons2)
         zc5 = zc1 + self.cons2
         zc6 = zc1 + zc_other
-        self.assertEqual(zc5.go_left_most().cons, zc6.go_left_most().cons)
+        self.assertEqual(zc5.go_up_most().cons, zc6.go_up_most().cons)
 
 
 if __name__ == '__main__':

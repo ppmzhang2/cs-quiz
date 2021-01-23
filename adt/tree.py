@@ -1,26 +1,38 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from functools import reduce
 from itertools import chain
-from typing import Any, Callable, Iterable, NamedTuple, Optional, Tuple
+from typing import Callable, Sequence, Tuple, TypeVar
 
 from adt.stack import Stack
 
+T = TypeVar('T')
 
-class Tree(NamedTuple):
+
+class BaseTree:
     """
-    Immutable Tree
+    base class of a tree
     """
-    node: Any
-    children: Tuple[Tree, ...] = ()
+    @property
+    def root(self):
+        raise NotImplementedError
 
     @property
-    def is_leaf(self):
-        return self.children == ()
+    def subtrees(self):
+        raise NotImplementedError
+
+    @property
+    def is_leaf(self) -> bool:
+        return len(self.subtrees) == 0
 
     @classmethod
-    def _dfs_helper(cls, stack: Stack, acc: Tuple[Any, ...],
-                    cb: Callable[[Tree], Iterable[Tree]]):
+    def _dfs_helper(
+        cls,
+        stack: Stack,
+        acc: Tuple[T, ...],
+        cb: Callable[[BaseTree], Sequence[BaseTree]],
+    ) -> Tuple[T, ...]:
         """depth-first search helper
         depth-first search is like manipulating a stack: get a tree in a stack,
         then pop it out and push into the stack its node value and its children
@@ -36,9 +48,9 @@ class Tree(NamedTuple):
             if stack.empty():
                 break
 
-            tree: Tree = stack.pop()
+            tree = stack.pop()
             if tree.is_leaf:
-                acc = acc + (tree.node, )
+                acc = acc + (tree.root, )
             else:
                 items = cb(tree)
                 for child in items:
@@ -47,36 +59,38 @@ class Tree(NamedTuple):
         return acc
 
     @staticmethod
-    def __bfs(tp: Tuple[Tree, ...]) -> Tuple[Tree, ...]:
+    def _bfs(tp: Tuple[BaseTree, ...]) -> Tuple[BaseTree, ...]:
         return reduce(
             lambda x, y: x + tuple(
-                filter(lambda tr: tr is not None, y.children)), tp, ())
+                filter(lambda tr: tr is not None, y.subtrees)), tp, ())
 
-    def bfs(self) -> Tuple[Any, ...]:
+    def bfs(self) -> Tuple[T, ...]:
         """Breadth-first search
 
         :return:
         """
-        def helper(tp: Tuple[Tree, ...], rec: Tuple[Any,
-                                                    ...]) -> Tuple[Any, ...]:
+        def helper(
+            tp: Tuple[BaseTree, ...],
+            rec: Tuple[T, ...],
+        ) -> Tuple[T, ...]:
             if not tp:
                 return rec
-            rec_ = rec + tuple(i.node for i in tp)
-            return helper(Tree.__bfs(tp), rec_)
+            rec_ = rec + tuple(i.root for i in tp)
+            return helper(type(self)._bfs(tp), rec_)
 
         return helper((self, ), ())
 
-    def dfs_pre(self) -> Tuple[Any, ...]:
+    def dfs_pre(self) -> Tuple[T, ...]:
         def callback(tree: Tree):
-            return chain(reversed(tree.children),
-                         (type(self)(node=tree.node), ))
+            return chain(reversed(tree.subtrees),
+                         (type(self)(node=tree.root), ))
 
         return self._dfs_helper(Stack((self, )), (), callback)
 
-    def dfs_post(self) -> Tuple[Any, ...]:
-        def callback(tree: Tree):
-            return chain((type(self)(node=tree.node), ),
-                         reversed(tree.children))
+    def dfs_post(self) -> Tuple[T, ...]:
+        def callback(tree: BaseTree):
+            return chain((type(self)(node=tree.root), ),
+                         reversed(tree.subtrees))
 
         return self._dfs_helper(Stack((self, )), (), callback)
 
@@ -85,29 +99,72 @@ class Tree(NamedTuple):
 
         :return: tree depth
         """
-        def helper(tp: Tuple[Tree, ...], rec: int) -> int:
+        def helper(tp: Tuple[BaseTree, ...], rec: int) -> int:
             if not tp:
                 return rec
-            return helper(Tree.__bfs(tp), rec + 1)
+            return helper(type(self)._bfs(tp), rec + 1)
 
         return helper((self, ), 0)
 
+    def _str(self, indent: int) -> str:
+        if self.is_leaf:
+            return '- ' * indent + self.root.__str__() + ' (leaf)'
+        return '- ' * indent + self.root.__str__() + '\n' + '\n'.join(
+            map(lambda s: type(self)._str(s, indent + 1), self.subtrees))
 
-class BTree(Tree):
+    def __str__(self):
+        return self._str(0)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+@dataclass(frozen=True)
+class Tree(BaseTree):
+    node: T
+    children: Tuple[Tree, ...] = ()
+
+    @property
+    def root(self) -> T:
+        return self.node
+
+    @property
+    def subtrees(self) -> Tuple[Tree, ...]:
+        return self.children
+
+    def __str__(self):
+        return 'tree:\n' + super().__str__()
+
+    def __repr__(self):
+        return self.__str__()
+
+
+@dataclass(frozen=True)
+class BTree(BaseTree):
     """
     Immutable Binary Tree
     """
-    def __new__(cls, node: Any, left: BTree = None, right: BTree = None):
-        children: Tuple[Optional[BTree], ...] = tuple(
-            filter(lambda t: t is not None, (left, right)))
-        self = super().__new__(cls, node, children)
-        self.left = left
-        self.right = right
-        return self
+    node: T
+    left: BTree = None
+    right: BTree = None
 
-    def dfs_in(self) -> Tuple[Any, ...]:
+    @property
+    def root(self) -> T:
+        return self.node
+
+    @property
+    def subtrees(self) -> Tuple[BTree, ...]:
+        return tuple(filter(lambda x: x is not None, (self.left, self.right)))
+
+    def dfs_in(self) -> Tuple[T, ...]:
         def callback(tree: BTree):
             return filter(lambda t: t is not None,
                           (tree.right, type(self)(node=tree.node), tree.left))
 
         return self._dfs_helper(Stack((self, )), (), callback)
+
+    def __str__(self):
+        return 'binary tree:\n' + super().__str__()
+
+    def __repr__(self):
+        return self.__str__()

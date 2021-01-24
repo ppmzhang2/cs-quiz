@@ -30,7 +30,6 @@ Tree1:
   8      9 10  11
 
 """
-
 import unittest
 
 from adt.tree import BTree, Tree
@@ -69,6 +68,32 @@ class TreeTest(unittest.TestCase):
     tr1_bfs = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
     tr1_dfs_pre = (1, 2, 5, 8, 3, 6, 4, 7, 9, 10, 11)
     tr1_dfs_post = (8, 5, 2, 6, 3, 9, 10, 11, 7, 4, 1)
+    tr1_str = (
+        'tree:',
+        '1',
+        '- 2',
+        '- - 5',
+        '- - - 8 (leaf)',
+        '- 3',
+        '- - 6 (leaf)',
+        '- 4',
+        '- - 7',
+        '- - - 9 (leaf)',
+        '- - - 10 (leaf)',
+        '- - - 11 (leaf)',
+    )
+    ibt2_str = (
+        'binary tree:',
+        '1',
+        '- 2',
+        '- - 3',
+        '- - - 4 (leaf)',
+        '- 5',
+        '- - 6 (leaf)',
+        '- - 7',
+        '- - - 8 (leaf)',
+        '- - - 9 (leaf)',
+    )
 
     def test_btree(self):
         self.assertEqual(self.ibt1_depth, self.ibt1.depth())
@@ -82,6 +107,8 @@ class TreeTest(unittest.TestCase):
         self.assertEqual(self.tr1_bfs, self.tr1.bfs())
         self.assertEqual(self.tr1_dfs_pre, self.tr1.dfs_pre())
         self.assertEqual(self.tr1_dfs_post, self.tr1.dfs_post())
+        self.assertEqual(repr(self.tr1), '\n'.join(self.tr1_str))
+        self.assertEqual(repr(self.ibt2), '\n'.join(self.ibt2_str))
 
 
 if __name__ == '__main__':

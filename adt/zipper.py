@@ -1,137 +1,364 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from itertools import chain
-from typing import Any, Generator, NamedTuple, Optional, Tuple
+from typing import Generator, Optional, Tuple, TypeVar
 
 from adt.cons import Cons
 from adt.tree import Tree
 
+T = TypeVar('T')
 
-class Zipper(NamedTuple):
-    material: Any
-    upper: Zipper
+
+@dataclass(frozen=True)
+class BaseContext:
+    pass
+
+
+@dataclass(frozen=True)
+class ConsContext(BaseContext):
+    node: T
+
+
+@dataclass(frozen=True)
+class TreeContext(BaseContext):
+    root: T
+    left: Tuple[Tree, ...]
+    right: Tuple[Tree, ...]
 
     def __str__(self):
-        def helper(material: Any, upper: ConsZipper,
-                   rec: Tuple[Any, ...]) -> Tuple[Any, ...]:
-            if upper is None:
-                return (material, ) + rec
-            return helper(upper.material, upper.upper, (material, ) + rec)
-
-        if self is None:
-            return ().__str__()
-        return helper(self.material, self.upper, ()).__str__()
+        left_str = '\n'.join(map(repr, self.left))
+        right_str = '\n'.join(map(repr, self.right))
+        return '\n'.join((
+            f'root: {repr(self.root)}',
+            f'left: {left_str}',
+            f'right: {right_str}',
+        ))
 
     def __repr__(self):
         return self.__str__()
 
 
-class TreeZipper(Zipper):
-    def __new__(cls,
-                upper_node: Any,
-                left_siblings=(),
-                right_siblings=(),
-                upper: TreeZipper = ()):
-        material: Tuple = tuple((upper_node, left_siblings, right_siblings))
-        self = super().__new__(cls, material=material, upper=upper)
-        self.upper_node = upper_node
-        self.left_siblings = left_siblings
-        self.right_siblings = right_siblings
-        return self
+@dataclass(frozen=True)
+class BaseContexts:
+    rec: BaseContexts
+
+    @property
+    def context(self):
+        raise NotImplementedError
+
+    @property
+    def depth(self):
+        def helper(rec, acc):
+            if not rec:
+                return acc
+            return helper(rec.rec, acc + 1)
+
+        if not self:
+            return 0
+        return helper(self.rec, 1)
+
+    def _str(self):
+        if not self:
+            return repr(self)
+        return repr(self.context) + '\n->\n' + type(self)._str(self.rec)
+
+    def __str__(self):
+        return self._str()
+
+    def __repr__(self):
+        return self.__str__()
 
 
-class ZipperTree(NamedTuple):
+@dataclass(frozen=True)
+class ConsContexts(BaseContexts, ConsContext):
+    rec: ConsContexts = None
+
+    @property
+    def context(self):
+        return ConsContext(self.node)
+
+    def __str__(self):
+        return 'Cons contexts:\n' + super().__str__()
+
+    def __repr__(self):
+        return self.__str__()
+
+
+@dataclass(frozen=True)
+class TreeContexts(BaseContexts, TreeContext):
+    rec: TreeContexts = None
+
+    @property
+    def context(self):
+        return TreeContext(self.root, self.left, self.right)
+
+    def __str__(self):
+        return 'Tree contexts:\n' + super().__str__()
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class BaseZipper:
+    @property
+    def _body(self):
+        raise NotImplementedError
+
+    @property
+    def _contexts(self) -> BaseContexts:
+        raise NotImplementedError
+
+    @property
+    def depth(self) -> int:
+        return self._contexts.depth
+
+    @property
+    def top(self) -> bool:
+        return self._contexts is None
+
+    @property
+    def bottom(self) -> bool:
+        raise NotImplementedError
+
+    def go_up(self):
+        raise NotImplementedError
+
+    def go_down(self):
+        raise NotImplementedError
+
+    def __str__(self):
+        return '\n'.join((
+            f'body: {repr(self._body)}',
+            f'contexts: {repr(self._contexts)}',
+        ))
+
+
+@dataclass(frozen=True)
+class ZipperCons(BaseZipper):
+    cons: Cons
+    contexts: ConsContexts
+
+    @property
+    def _body(self) -> Cons:
+        return self.cons
+
+    @property
+    def _contexts(self) -> ConsContexts:
+        return self.contexts
+
+    @property
+    def bottom(self):
+        if not self.cons.cdr:
+            return True
+        return False
+
+    @classmethod
+    def from_cons(cls, cons: Cons):
+        return cls(cons=cons, contexts=None)
+
+    def go_up(self) -> ZipperCons:
+        if self.top:
+            return self
+        return type(self)(
+            type(self.cons)(self.contexts.node, self.cons),
+            self.contexts.rec,
+        )
+
+    def go_down(self) -> ZipperCons:
+        if self.bottom:
+            return self
+        return type(self)(
+            self.cons.cdr,
+            ConsContexts(self.cons.car, self.contexts),
+        )
+
+    def go_up_most(self) -> ZipperCons:
+        if self.top:
+            return self
+        return self.go_up().go_up_most()
+
+    def go_down_most(self) -> ZipperCons:
+        if self.bottom:
+            return self
+        return self.go_down().go_down_most()
+
+    def __len__(self):
+        return self.go_down_most().depth + 1
+
+    def get_item_int(self, item: int, reverse=False):
+        if item == 0:
+            return self.cons.car
+        if item < 0 and not reverse:
+            return self.go_down_most().get_item_int(item + 1, True)
+        if item > 0 and not reverse:
+            if item == 0:
+                return self.go_up_most().cons.car
+            if self.bottom:
+                raise IndexError("Index out of range")
+            return self.go_down().get_item_int(item - 1)
+        if self.bottom:
+            raise IndexError("Index out of range")
+        return self.go_up().get_item_int(item + 1, reverse)
+
+    def __getitem__(self, item):
+        if isinstance(item, slice):
+            return type(self.cons).constr(
+                (self.get_item_int(i)
+                 for i in range(*item.indices(self.__len__()))))
+        if isinstance(item, int):
+            return self.get_item_int(item)
+        raise TypeError("Invalid argument type")
+
+    def __add__(self, other) -> ZipperCons:
+        if isinstance(other, ZipperCons):
+            left = self.go_down_most()
+            right = other.go_up_most()
+            return type(self)(
+                cons=Cons(car=left.cons.car, cdr=right.cons),
+                contexts=left.contexts,
+            )
+        if isinstance(other, Cons):
+            left = self.go_down_most()
+            return type(self)(
+                cons=Cons(car=left.cons.car, cdr=other),
+                contexts=left.contexts,
+            )
+        raise TypeError("Invalid argument type")
+
+
+@dataclass(frozen=True)
+class ZipperTree(BaseZipper):
     tree: Tree
-    zipper: TreeZipper = None
+    contexts: TreeContexts
 
     @classmethod
     def from_tree(cls, tree: Tree):
-        return cls(tree=tree, zipper=None)
+        return cls(tree=tree, contexts=None)
 
     @property
-    def top_most(self) -> bool:
-        return self.zipper is None
+    def _body(self) -> Tree:
+        return self.tree
+
+    @property
+    def _contexts(self) -> TreeContexts:
+        return self.contexts
+
+    def __str__(self):
+        return 'Tree with Zipper:\n' + super().__str__()
+
+    def __repr__(self):
+        return self.__str__()
+
+    @property
+    def bottom(self) -> bool:
+        if not self.tree.children:
+            return True
+        return False
+
+    def go_up(self) -> ZipperTree:
+        if self.top:
+            return self
+        return type(self)(
+            type(self.tree)(
+                self.contexts.root,
+                (
+                    *self.contexts.left,
+                    self.tree,
+                    *self.contexts.right,
+                ),
+            ),
+            self.contexts.rec,
+        )
+
+    def go_down(self, idx=0) -> ZipperTree:
+        if self.bottom:
+            return self
+        if idx < 0:
+            idx_ = len(self.tree.children) + idx
+        else:
+            idx_ = idx
+        subtree = self.tree.children[idx_]
+        return type(self)(
+            subtree,
+            TreeContexts(
+                self.tree.root,
+                self.tree.children[:idx_],
+                self.tree.children[idx_ + 1:],
+                self.contexts,
+            ),
+        )
+
+    def go_up_most(self) -> ZipperTree:
+        if self.top:
+            return self
+        return self.go_up().go_up_most()
 
     @property
     def left_most(self) -> bool:
-        return self.zipper.left_siblings == ()
+        if not self.contexts:
+            return True
+        return not self.contexts.left
 
     @property
     def right_most(self) -> bool:
-        return self.zipper.right_siblings == ()
-
-    @property
-    def bottom_most(self) -> bool:
-        return self.tree.children == ()
-
-    def go_up(self) -> ZipperTree:
-        if self.top_most:
-            return self
-        children = self.zipper.left_siblings + (
-            self.tree, ) + self.zipper.right_siblings
-        return (type(self))(tree=Tree(node=self.zipper.upper_node,
-                                      children=children),
-                            zipper=self.zipper.upper)
-
-    def go_down(self, left=True) -> ZipperTree:
-        if self.bottom_most:
-            return self
-        if left:
-            tr = self.tree.children[0]
-            left_sibling = ()
-            right_sibling = self.tree.children[1:]
-        else:
-            tr = self.tree.children[-1]
-            left_sibling = self.tree.children[:-1]
-            right_sibling = ()
-        return (type(self))(tree=tr,
-                            zipper=TreeZipper(upper_node=self.tree.node,
-                                              left_siblings=left_sibling,
-                                              right_siblings=right_sibling,
-                                              upper=self.zipper))
+        if not self.contexts:
+            return True
+        return not self.contexts.right
 
     def go_left(self) -> ZipperTree:
         if self.left_most:
             return self
-        tr = self.zipper.left_siblings[-1]
-        left_siblings = self.zipper.left_siblings[:-1]
-        right_siblings = (self.tree, ) + self.zipper.right_siblings
-        return (type(self))(tree=tr,
-                            zipper=TreeZipper(
-                                upper_node=self.zipper.upper_node,
-                                left_siblings=left_siblings,
-                                right_siblings=right_siblings,
-                                upper=self.zipper.upper))
+        tr = self.contexts.left[-1]
+        left = self.contexts.left[:-1]
+        right = (self.tree, *self.contexts.right)
+        return (type(self))(tr,
+                            TreeContexts(
+                                self.contexts.root,
+                                left,
+                                right,
+                                self.contexts.rec,
+                            ))
 
     def go_right(self) -> ZipperTree:
         if self.right_most:
             return self
-        tr = self.zipper.right_siblings[0]
-        left_siblings = self.zipper.left_siblings + (self.tree, )
-        right_siblings = self.zipper.right_siblings[1:]
-        return (type(self))(tree=tr,
-                            zipper=TreeZipper(
-                                upper_node=self.zipper.upper_node,
-                                left_siblings=left_siblings,
-                                right_siblings=right_siblings,
-                                upper=self.zipper.upper))
+        tr = self.contexts.right[0]
+        left = (*self.contexts.left, self.tree)
+        right = self.contexts.right[1:]
+        return (type(self))(tr,
+                            TreeContexts(
+                                self.contexts.root,
+                                left,
+                                right,
+                                self.contexts.rec,
+                            ))
 
-    def go_top(self) -> ZipperTree:
-        if self.top_most:
+    def go_down_most(self, left=True) -> ZipperTree:
+        """go local bottom
+        """
+        if self.bottom and ((left and self.left_most) or
+                            (not left and self.right_most)):
             return self
-        return self.go_up().go_top()
-
-    def go_bottom(self, left=True) -> ZipperTree:
-        if self.bottom_most and ((left and self.left_most) or
-                                 (not left and self.right_most)):
-            return self
-        return self.go_down(left=left).go_bottom(left=left)
+        if self.bottom and left:
+            return self.go_left().go_down_most(left=left)
+        if self.bottom and not left:
+            return self.go_right().go_down_most(left=left)
+        if left:
+            idx = 0
+        else:
+            idx = -1
+        return self.go_down(idx=idx).go_down_most(left=left)
 
     def go_bottomleft(self) -> ZipperTree:
-        return self.go_top().go_bottom(left=True)
+        """go global bottom-left
+        """
+        return self.go_up_most().go_down_most(left=True)
 
     def go_bottomright(self) -> ZipperTree:
-        return self.go_top().go_bottom(left=False)
+        """go global bottom-right
+        """
+        return self.go_up_most().go_down_most(left=False)
 
     def dfs_pre(self) -> Generator[ZipperTree]:
         """pre-order deep first search
@@ -145,22 +372,25 @@ class ZipperTree(NamedTuple):
         4. if bottom most but not right most, go for right siblings
         :return: ZTree generator
         """
-        tr = self.go_top()
+        tr = self.go_up_most()
         bottomright = tr.go_bottomright()
         while True:
             yield tr
             if tr == bottomright:
                 break
-            if tr.bottom_most and tr.right_most:
+            if tr.bottom and tr.right_most:
                 while True:
+                    # print('up')
                     tr = tr.go_up()
                     if not tr.right_most:
                         tr = tr.go_right()
                         break
-            elif tr.bottom_most and not tr.right_most:
+            elif tr.bottom and not tr.right_most:
                 tr = tr.go_right()
+                # print('right')
             else:
-                tr = tr.go_down(left=True)
+                tr = tr.go_down(idx=0)
+                # print('down left')
 
     def dfs_post(self) -> Generator[ZipperTree]:
         """post-order deep first search
@@ -175,27 +405,27 @@ class ZipperTree(NamedTuple):
         :return: ZTree generator
         """
         tr = self.go_bottomleft()
-        top = tr.go_top()
+        top = tr.go_up_most()
         while True:
             yield tr
             if tr == top:
                 break
             if tr.right_most:
                 tr = tr.go_up()
-            elif tr.bottom_most:
+            elif tr.bottom:
                 tr = tr.go_right()
             else:
-                tr = tr.go_right().go_bottom(left=True)
+                tr = tr.go_right().go_down_most(left=True)
 
     def child_iter(self) -> Generator[Optional[ZipperTree], ...]:
         """iterate over its children
 
         :return:
         """
-        if self.bottom_most:
+        if self.bottom:
             yield
         else:
-            tr = self.go_down(left=True)
+            tr = self.go_down(idx=0)
             while True:
                 yield tr
                 if tr.right_most:
@@ -218,96 +448,3 @@ class ZipperTree(NamedTuple):
             return helper(tp_, chain(rec, tp_))
 
         return helper((self, ), iter((self, )))
-
-
-class ConsZipper(Zipper):
-    def __new__(cls, material: Any = None, upper: ConsZipper = None):
-        self = super().__new__(cls, material=material, upper=upper)
-        return self
-
-
-class ZipperCons(NamedTuple):
-    cons: Cons
-    zipper: ConsZipper
-    index: int = 0
-
-    @classmethod
-    def from_cons(cls, cons: Cons):
-        return cls(cons=cons, zipper=None, index=0)
-
-    @property
-    def left_most(self):
-        if self.index == 0:
-            return True
-        return False
-
-    @property
-    def right_most(self):
-        if self.cons.cdr is None:
-            return True
-        return False
-
-    def go_right(self):
-        if self.right_most:
-            return self
-        return type(self)(cons=self.cons.cdr,
-                          zipper=ConsZipper(material=self.cons.car,
-                                            upper=self.zipper),
-                          index=self.index + 1)
-
-    def go_left(self):
-        if self.left_most:
-            return self
-        return type(self)(cons=Cons(car=self.zipper.material, cdr=self.cons),
-                          zipper=self.zipper.upper,
-                          index=self.index - 1)
-
-    def go_right_most(self):
-        if self.right_most:
-            return self
-        return self.go_right().go_right_most()
-
-    def go_left_most(self):
-        if self.left_most:
-            return self
-        return self.go_left().go_left_most()
-
-    def __len__(self):
-        return self.go_right_most().index + 1
-
-    def get_item_int(self, item: int, reverse=False):
-        if item < 0 and not reverse:
-            return self.go_right_most().get_item_int(item + 1, True)
-        if item > 0 and not reverse:
-            if item == 0:
-                return self.go_left_most().cons.car
-            if self.right_most:
-                raise IndexError("Index out of range")
-            return self.go_right().get_item_int(item - 1)
-        if item == 0:
-            return self.cons.car
-        if self.left_most:
-            raise IndexError("Index out of range")
-        return self.go_left().get_item_int(item + 1, reverse)
-
-    def __getitem__(self, item):
-        if isinstance(item, slice):
-            return Cons.constr((self.get_item_int(i)
-                                for i in range(*item.indices(self.__len__()))))
-        if isinstance(item, int):
-            return self.get_item_int(item)
-        raise TypeError("Invalid argument type")
-
-    def __add__(self, other) -> ZipperCons:
-        if isinstance(other, ZipperCons):
-            left = self.go_right_most()
-            right = other.go_left_most()
-            return type(self)(cons=Cons(car=left.cons.car, cdr=right.cons),
-                              zipper=left.zipper,
-                              index=left.index)
-        if isinstance(other, Cons):
-            left = self.go_right_most()
-            return type(self)(cons=Cons(car=left.cons.car, cdr=other),
-                              zipper=left.zipper,
-                              index=left.index)
-        raise TypeError("Invalid argument type")

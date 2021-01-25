@@ -17,3 +17,16 @@ Output:
   []
 ]
 """
+# TODO
+from typing import Sequence
+
+if __name__ == '__main__':
+    ipt_1 = [1, 2, 2]
+    exp_1 = (
+        (2, ),
+        (1, ),
+        (1, 2, 2),
+        (2, 2),
+        (1, 2),
+        (),
+    )

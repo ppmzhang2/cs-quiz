@@ -20,7 +20,8 @@ import unittest
 
 from adt.cons import Cons
 from adt.tree import Tree
-from adt.zipper import ZipperCons, ZipperTree
+from adt.zipper.zipper_cons import ZipperCons
+from adt.zipper.zipper_tree import ZipperTree
 
 
 class ZipperConsTest(unittest.TestCase):

@@ -49,9 +49,9 @@ class ZipperConsTest(unittest.TestCase):
 
     def test_zipper_tree(self):
         zt = ZipperTree.from_tree(self.tr)
-        zt_bfs = tuple(t.tree.node for t in zt.bfs())
-        zt_dfs_pre = tuple(t.tree.node for t in zt.dfs_pre())
-        zt_dfs_post = tuple(t.tree.node for t in zt.dfs_post())
+        zt_bfs = tuple(zt.bfs())
+        zt_dfs_pre = tuple(zt.dfs_pre())
+        zt_dfs_post = tuple(zt.dfs_post())
         self.assertEqual(self.tr_bfs, zt_bfs)
         self.assertEqual(self.tr_dfs_pre, zt_dfs_pre)
         self.assertEqual(self.tr_dfs_post, zt_dfs_post)
@@ -67,9 +67,15 @@ class ZipperConsTest(unittest.TestCase):
         self.assertEqual(self.len_cons, len(zc1))
         self.assertEqual(self.cons_slice, zc1[3:0:-2])
         with self.assertRaises(IndexError):
-            zc1[4]
+            try:
+                zc1[4]
+            except Exception as e:
+                raise e
         with self.assertRaises(IndexError):
-            zc1[-5]
+            try:
+                zc1[-5]
+            except Exception as e:
+                raise e
         zc_other = ZipperCons.from_cons(cons=self.cons2)
         zc5 = zc1 + self.cons2
         zc6 = zc1 + zc_other

@@ -2,15 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import reduce
-from itertools import chain
-from typing import Callable, Sequence, Tuple, TypeVar
-
-from adt.stack import Stack
+from typing import Callable, Generic, Sequence, Tuple, TypeVar
 
 T = TypeVar('T')
 
 
-class BaseTree:
+class BaseTree(Generic[T]):
     """
     base class of a tree
     """
@@ -29,9 +26,9 @@ class BaseTree:
     @classmethod
     def _dfs_helper(
         cls,
-        stack: Stack,
+        stack: Tuple[BaseTree[T], ...],
         acc: Tuple[T, ...],
-        cb: Callable[[BaseTree], Sequence[BaseTree]],
+        cb: Callable[[BaseTree[T]], Sequence[BaseTree[T]]],
     ) -> Tuple[T, ...]:
         """depth-first search helper
         depth-first search is like manipulating a stack: get a tree in a stack,
@@ -45,21 +42,18 @@ class BaseTree:
           the tree popped out
         """
         while True:
-            if stack.empty():
-                break
+            if not stack:
+                return acc
 
-            tree = stack.pop()
+            tree = stack[0]
+            stack = stack[1:]
             if tree.is_leaf:
-                acc = acc + (tree.root, )
+                acc = (*acc, tree.root)
             else:
-                items = cb(tree)
-                for child in items:
-                    stack.push(child)
-
-        return acc
+                stack = (*cb(tree), *stack)
 
     @staticmethod
-    def _bfs(tp: Tuple[BaseTree, ...]) -> Tuple[BaseTree, ...]:
+    def _bfs(tp: Tuple[BaseTree[T], ...]) -> Tuple[BaseTree[T], ...]:
         return reduce(
             lambda x, y: x + tuple(
                 filter(lambda tr: tr is not None, y.subtrees)), tp, ())
@@ -70,7 +64,7 @@ class BaseTree:
         :return:
         """
         def helper(
-            tp: Tuple[BaseTree, ...],
+            tp: Tuple[BaseTree[T], ...],
             rec: Tuple[T, ...],
         ) -> Tuple[T, ...]:
             if not tp:
@@ -81,25 +75,23 @@ class BaseTree:
         return helper((self, ), ())
 
     def dfs_pre(self) -> Tuple[T, ...]:
-        def callback(tree: Tree):
-            return chain(reversed(tree.subtrees),
-                         (type(self)(node=tree.root), ))
+        def callback(tree: BaseTree[T]) -> Tuple[BaseTree[T], ...]:
+            return (type(self)(node=tree.root), *tree.subtrees)
 
-        return self._dfs_helper(Stack((self, )), (), callback)
+        return self._dfs_helper((self, ), (), callback)
 
     def dfs_post(self) -> Tuple[T, ...]:
-        def callback(tree: BaseTree):
-            return chain((type(self)(node=tree.root), ),
-                         reversed(tree.subtrees))
+        def callback(tree: BaseTree[T]) -> Tuple[BaseTree[T], ...]:
+            return (*tree.subtrees, type(self)(node=tree.root))
 
-        return self._dfs_helper(Stack((self, )), (), callback)
+        return self._dfs_helper((self, ), (), callback)
 
     def depth(self) -> int:
         """check binary tree depth with depth-first search
 
         :return: tree depth
         """
-        def helper(tp: Tuple[BaseTree, ...], rec: int) -> int:
+        def helper(tp: Tuple[BaseTree[T], ...], rec: int) -> int:
             if not tp:
                 return rec
             return helper(type(self)._bfs(tp), rec + 1)
@@ -120,16 +112,16 @@ class BaseTree:
 
 
 @dataclass(frozen=True)
-class Tree(BaseTree):
+class Tree(BaseTree[T]):
     node: T
-    children: Tuple[Tree, ...] = ()
+    children: Tuple[Tree[T], ...] = ()
 
     @property
     def root(self) -> T:
         return self.node
 
     @property
-    def subtrees(self) -> Tuple[Tree, ...]:
+    def subtrees(self) -> Tuple[Tree[T], ...]:
         return self.children
 
     def __str__(self):
@@ -140,28 +132,28 @@ class Tree(BaseTree):
 
 
 @dataclass(frozen=True)
-class BTree(BaseTree):
+class BTree(BaseTree[T]):
     """
     Immutable Binary Tree
     """
     node: T
-    left: BTree = None
-    right: BTree = None
+    left: BTree[T] = None
+    right: BTree[T] = None
 
     @property
     def root(self) -> T:
         return self.node
 
     @property
-    def subtrees(self) -> Tuple[BTree, ...]:
+    def subtrees(self) -> Tuple[BTree[T], ...]:
         return tuple(filter(lambda x: x is not None, (self.left, self.right)))
 
     def dfs_in(self) -> Tuple[T, ...]:
-        def callback(tree: BTree):
+        def callback(tree: BTree[T]) -> Tuple[BTree[T], ...]:
             return filter(lambda t: t is not None,
-                          (tree.right, type(self)(node=tree.node), tree.left))
+                          (tree.left, type(self)(node=tree.node), tree.right))
 
-        return self._dfs_helper(Stack((self, )), (), callback)
+        return self._dfs_helper((self, ), (), callback)
 
     def __str__(self):
         return 'binary tree:\n' + super().__str__()

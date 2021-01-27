@@ -10,16 +10,16 @@ T = TypeVar('T')
 
 
 @dataclass(frozen=True)
-class ConsContext(BaseContext):
+class ConsContext(BaseContext[T]):
     node: T
 
 
 @dataclass(frozen=True)
-class ConsContexts(BaseContexts, ConsContext):
+class ConsContexts(BaseContexts, ConsContext[T]):
     rec: ConsContexts = None
 
     @property
-    def context(self):
+    def context(self) -> ConsContext[T]:
         return ConsContext(self.node)
 
     def __str__(self):
@@ -30,16 +30,16 @@ class ConsContexts(BaseContexts, ConsContext):
 
 
 @dataclass(frozen=True)
-class ZipperCons(BaseZipper):
-    cons: Cons
-    contexts: ConsContexts
+class ZipperCons(BaseZipper[T]):
+    cons: Cons[T]
+    contexts: ConsContexts[T]
 
     @property
-    def _body(self) -> Cons:
+    def _body(self) -> Cons[T]:
         return self.cons
 
     @property
-    def _contexts(self) -> ConsContexts:
+    def _contexts(self) -> ConsContexts[T]:
         return self.contexts
 
     @property
@@ -49,10 +49,10 @@ class ZipperCons(BaseZipper):
         return False
 
     @classmethod
-    def from_cons(cls, cons: Cons):
+    def from_cons(cls, cons: Cons[T]) -> ZipperCons[T]:
         return cls(cons=cons, contexts=None)
 
-    def go_up(self) -> ZipperCons:
+    def go_up(self) -> ZipperCons[T]:
         if self.top:
             return self
         return type(self)(
@@ -60,7 +60,7 @@ class ZipperCons(BaseZipper):
             self.contexts.rec,
         )
 
-    def go_down(self, *args, **kwargs) -> ZipperCons:
+    def go_down(self, *args, **kwargs) -> ZipperCons[T]:
         if self.bottom:
             return self
         return type(self)(
@@ -68,7 +68,7 @@ class ZipperCons(BaseZipper):
             ConsContexts(self.cons.car, self.contexts),
         )
 
-    def go_down_most(self, *args, **kwargs) -> ZipperCons:
+    def go_down_most(self, *args, **kwargs) -> ZipperCons[T]:
         if self.bottom:
             return self
         return self.go_down().go_down_most()

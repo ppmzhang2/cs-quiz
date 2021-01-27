@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TypeVar
+from typing import Generic, TypeVar
 
 T = TypeVar('T')
 
 
 @dataclass(frozen=True)
-class BaseContext:
+class BaseContext(Generic[T]):
     pass
 
 
@@ -42,13 +42,13 @@ class BaseContexts:
         return self.__str__()
 
 
-class BaseZipper:
+class BaseZipper(Generic[T]):
     @property
     def _body(self):
         raise NotImplementedError
 
     @property
-    def _contexts(self) -> BaseContexts:
+    def _contexts(self) -> BaseContexts[T]:
         raise NotImplementedError
 
     @property

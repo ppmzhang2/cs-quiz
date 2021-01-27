@@ -2,18 +2,18 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import reduce
-from typing import Sequence, TypeVar
+from typing import Sequence, TypeVar, Generic
 
 T = TypeVar('T')
 
 
 @dataclass(frozen=True)
-class Cons:
+class Cons(Generic[T]):
     """
     Immutable Linked List
     """
     car: T
-    cdr: Cons = None
+    cdr: Cons[T] = None
 
     def traversal(self) -> Sequence[T]:
         rec = self

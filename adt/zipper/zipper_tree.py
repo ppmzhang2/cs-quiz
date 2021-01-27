@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from itertools import chain
-from typing import Generator, Optional, Tuple, TypeVar
+from functools import reduce
+from typing import Iterator, Sequence, Tuple, TypeVar
 
 from adt.tree import Tree
 from adt.zipper.base_zipper import BaseContext, BaseContexts, BaseZipper
@@ -11,10 +11,10 @@ T = TypeVar('T')
 
 
 @dataclass(frozen=True)
-class TreeContext(BaseContext):
+class TreeContext(BaseContext[T]):
     root: T
-    left: Tuple[Tree, ...]
-    right: Tuple[Tree, ...]
+    left: Tuple[Tree[T], ...]
+    right: Tuple[Tree[T], ...]
 
     def __str__(self):
         left_str = '\n'.join(map(repr, self.left))
@@ -30,11 +30,11 @@ class TreeContext(BaseContext):
 
 
 @dataclass(frozen=True)
-class TreeContexts(BaseContexts, TreeContext):
+class TreeContexts(BaseContexts, TreeContext[T]):
     rec: TreeContexts = None
 
     @property
-    def context(self):
+    def context(self) -> TreeContext[T]:
         return TreeContext(self.root, self.left, self.right)
 
     def __str__(self):
@@ -45,16 +45,16 @@ class TreeContexts(BaseContexts, TreeContext):
 
 
 @dataclass(frozen=True)
-class ZipperTree(BaseZipper):
-    tree: Tree
-    contexts: TreeContexts
+class ZipperTree(BaseZipper[T]):
+    tree: Tree[T]
+    contexts: TreeContexts[T]
 
     @classmethod
-    def from_tree(cls, tree: Tree):
+    def from_tree(cls, tree: Tree[T]):
         return cls(tree=tree, contexts=None)
 
     @property
-    def _body(self) -> Tree:
+    def _body(self) -> Tree[T]:
         return self.tree
 
     @property
@@ -73,7 +73,7 @@ class ZipperTree(BaseZipper):
             return True
         return False
 
-    def go_up(self) -> ZipperTree:
+    def go_up(self) -> ZipperTree[T]:
         if self.top:
             return self
         return type(self)(
@@ -88,7 +88,7 @@ class ZipperTree(BaseZipper):
             self.contexts.rec,
         )
 
-    def go_down(self, *args, **kwargs) -> ZipperTree:
+    def go_down(self, *args, **kwargs) -> ZipperTree[T]:
         idx = kwargs.get('idx', 0)
         if self.bottom:
             return self
@@ -119,7 +119,7 @@ class ZipperTree(BaseZipper):
             return True
         return not self.contexts.right
 
-    def go_left(self) -> ZipperTree:
+    def go_left(self) -> ZipperTree[T]:
         if self.left_most:
             return self
         tr = self.contexts.left[-1]
@@ -133,7 +133,7 @@ class ZipperTree(BaseZipper):
                                 self.contexts.rec,
                             ))
 
-    def go_right(self) -> ZipperTree:
+    def go_right(self) -> ZipperTree[T]:
         if self.right_most:
             return self
         tr = self.contexts.right[0]
@@ -147,7 +147,7 @@ class ZipperTree(BaseZipper):
                                 self.contexts.rec,
                             ))
 
-    def go_down_most(self, *args, **kwargs) -> ZipperTree:
+    def go_down_most(self, *args, **kwargs) -> ZipperTree[T]:
         """go local bottom
         """
         left = kwargs.get('left', True)
@@ -164,17 +164,17 @@ class ZipperTree(BaseZipper):
             idx = -1
         return self.go_down(idx=idx).go_down_most(left=left)
 
-    def go_bottomleft(self) -> ZipperTree:
+    def go_bottomleft(self) -> ZipperTree[T]:
         """go global bottom-left
         """
         return self.go_up_most().go_down_most(left=True)
 
-    def go_bottomright(self) -> ZipperTree:
+    def go_bottomright(self) -> ZipperTree[T]:
         """go global bottom-right
         """
         return self.go_up_most().go_down_most(left=False)
 
-    def dfs_pre(self) -> Generator[ZipperTree]:
+    def dfs_pre(self) -> Iterator[T]:
         """pre-order deep first search
 
         0. start from top
@@ -189,7 +189,7 @@ class ZipperTree(BaseZipper):
         tr = self.go_up_most()
         bottomright = tr.go_bottomright()
         while True:
-            yield tr
+            yield tr.tree.root
             if tr == bottomright:
                 break
             if tr.bottom and tr.right_most:
@@ -206,7 +206,7 @@ class ZipperTree(BaseZipper):
                 tr = tr.go_down(idx=0)
                 # print('down left')
 
-    def dfs_post(self) -> Generator[ZipperTree]:
+    def dfs_post(self) -> Iterator[T]:
         """post-order deep first search
 
         0. start from bottom-left most
@@ -221,7 +221,7 @@ class ZipperTree(BaseZipper):
         tr = self.go_bottomleft()
         top = tr.go_up_most()
         while True:
-            yield tr
+            yield tr.tree.root
             if tr == top:
                 break
             if tr.right_most:
@@ -231,34 +231,34 @@ class ZipperTree(BaseZipper):
             else:
                 tr = tr.go_right().go_down_most(left=True)
 
-    def child_iter(self) -> Generator[Optional[ZipperTree], ...]:
-        """iterate over its children
-
-        :return:
+    def children(self) -> Tuple[ZipperTree[T], ...]:
+        """all children Zipper Trees
         """
+        def helper(
+            zt: ZipperTree[T],
+            acc: Tuple[ZipperTree[T], ...],
+        ) -> Sequence[ZipperTree[T]]:
+            if zt.right_most:
+                return (*acc, zt)
+            return helper(zt.go_right(), (*acc, zt))
+
         if self.bottom:
-            yield
-        else:
-            tr = self.go_down(idx=0)
-            while True:
-                yield tr
-                if tr.right_most:
-                    break
-                tr = tr.go_right()
+            return ()
+        return helper(self.go_down(idx=0), ())
 
-    @staticmethod
-    def __mul_child_iter(
-        itr: Generator[Optional[ZipperTree], ...]
-    ) -> Generator[Optional[ZipperTree], ...]:
-        return filter(lambda x: x is not None,
-                      chain(*(zt.child_iter() for zt in itr)))
+    @classmethod
+    def generation(
+        cls,
+        seq: Sequence[ZipperTree[T]],
+    ) -> Tuple[ZipperTree[T], ...]:
+        return reduce(lambda x, y: x + y, map(cls.children, seq))
 
-    def bfs(self) -> Generator[Optional[ZipperTree], ...]:
-        def helper(tp: Tuple[Optional[ZipperTree], ...],
-                   rec: Generator[Optional[ZipperTree], ...]):
-            tp_ = tuple(ZipperTree.__mul_child_iter(iter(tp)))
-            if not tp_:
-                return rec
-            return helper(tp_, chain(rec, tp_))
+    def bfs(self) -> Iterator[ZipperTree[T]]:
+        def helper(inputs: Tuple[ZipperTree[T], ...],
+                   outputs: Iterator[ZipperTree[T]]):
+            seq = self.generation(inputs)
+            if not seq:
+                return iter(map(lambda x: x.tree.root, outputs))
+            return helper(seq, (*outputs, *seq))
 
-        return helper((self, ), iter((self, )))
+        return helper((self, ), (self, ))

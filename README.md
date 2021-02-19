@@ -72,6 +72,7 @@ My leetcode python solutions based on [azl397985856's project](https://github.co
 - [0098.Validate-Binary-Search-Tree](./quiz/m0098.py)
 - [0102.binary-tree-level-order-traversal](./quiz/m0102.py)
 - [0103.binary-tree-zigzag-level-order-traversal](./quiz/m0103.py)
+- [0105.Construct Binary Tree from Pre-order and In-order Traversal](./quiz/m0105.py)
 - [0113.Path-Sum-II](./quiz/m0113.py)
 - [0129.Sum-Root-to-Leaf-Numbers](./quiz/m0129.py)
 - [0130.Surrounded-Regions](./quiz/m0130.py)

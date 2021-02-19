@@ -1,4 +1,6 @@
 """Unique Paths
+TAG: dynamic-programming
+
 A robot is located at the top-left corner of a m x n grid (marked 'Start' in
 the diagram below).
 
@@ -77,7 +79,9 @@ class FSM(NamedTuple):
             FSM(self.x, self.y - 1, (*self.history, Move.DOWN)),
         )
 
-    def one_way_trip(self) -> FSM:
+    def transform(self) -> FSM:
+        '''go down straight or go right straight as these is no other option
+        '''
         assert self.status in (Status.RIGHT, Status.BOTTOM)
         if self.status == Status.RIGHT:
             return FSM(
@@ -88,7 +92,7 @@ class FSM(NamedTuple):
         return FSM(
             1,
             self.y,
-            (*self.history, *[Move.DOWN for _ in range(self.x - 1)]),
+            (*self.history, *[Move.RIGHT for _ in range(self.x - 1)]),
         )
 
 
@@ -103,7 +107,7 @@ class UniquePath:
             return cls.looper(inputs[1:], (*outputs, fsm))
         if fsm.status == Status.DIAGONAL:
             return cls.looper((*inputs[1:], *fsm.explode()), outputs)
-        return cls.looper((*inputs[1:], fsm.one_way_trip()), outputs)
+        return cls.looper((*inputs[1:], fsm.transform()), outputs)
 
     def solution(self, m: int, n: int) -> int:
         fsm = FSM(m, n, ())
@@ -126,4 +130,7 @@ if __name__ == '__main__':
     exp_4 = 6
 
     up = UniquePath()
-    print(up.solution(ipt_1_1, ipt_1_2))
+    assert up.solution(ipt_1_1, ipt_1_2) == exp_1
+    assert up.solution(ipt_2_1, ipt_2_2) == exp_2
+    assert up.solution(ipt_3_1, ipt_3_2) == exp_3
+    assert up.solution(ipt_4_1, ipt_4_2) == exp_4

@@ -1,4 +1,6 @@
 """Decode Ways
+TAG: dynamic-programming
+
 A message containing letters from A-Z can be encoded into numbers using the
 following mapping:
 
@@ -47,10 +49,12 @@ Constraints:
 """
 from __future__ import annotations
 
-from enum import Enum
-from typing import NamedTuple, Optional, Sequence
+from dataclasses import dataclass
+from enum import Enum, unique
+from typing import Optional, Sequence, Tuple
 
 
+@unique
 class Code(Enum):
     A = '1'
     B = '2'
@@ -80,6 +84,7 @@ class Code(Enum):
     Z = '26'
 
 
+@unique
 class Status(Enum):
     DOING = 1
     ONE = 2
@@ -87,9 +92,17 @@ class Status(Enum):
     INVALID = 4
 
 
-class FSM(NamedTuple):
+@dataclass(frozen=True)
+class FSM:
     ciphers: str
-    codes: Sequence[Code]
+    codes: Tuple[Code, ...]
+
+    @staticmethod
+    def safe_decode(cipher: str) -> Optional[Code]:
+        try:
+            return Code(cipher)
+        except ValueError:
+            return None
 
     @property
     def remaining(self) -> int:
@@ -97,6 +110,8 @@ class FSM(NamedTuple):
 
     @property
     def invalid(self):
+        '''invalid if codes contains None
+        '''
         if len(list(filter(lambda x: x is None, self.codes))) >= 1:
             return True
         return False
@@ -111,29 +126,22 @@ class FSM(NamedTuple):
             return Status.ONE
         return Status.DOING
 
+    def transform(self) -> FSM:
+        assert self.status == Status.ONE
+        return (type(self))('', (*self.codes, self.safe_decode(self.ciphers)))
 
-class Decode:
-    @staticmethod
-    def decipher(cipher: str) -> Optional[Code]:
-        try:
-            return Code(cipher)
-        except ValueError:
-            return None
-
-    @classmethod
-    def explode(cls, fsm: FSM) -> Sequence[FSM]:
-        assert fsm.status in (Status.DOING, Status.ONE)
-
-        if fsm.status == Status.ONE:
-            return (FSM('', (*fsm.codes, cls.decipher(fsm.ciphers))), )
-
+    def explode(self) -> Tuple[FSM, FSM]:
+        assert self.status == Status.DOING
         splits = (
-            (fsm.ciphers[1:], fsm.ciphers[:1]),
-            (fsm.ciphers[2:], fsm.ciphers[:2]),
+            (self.ciphers[1:], self.ciphers[:1]),
+            (self.ciphers[2:], self.ciphers[:2]),
         )
         return tuple(
-            FSM(tp[0], (*fsm.codes, cls.decipher(tp[1]))) for tp in splits)
+            (type(self))(tp[0], (*self.codes, self.safe_decode(tp[1])))
+            for tp in splits)
 
+
+class Decode:
     @classmethod
     def looper(cls, inputs: Sequence[FSM],
                outputs: Sequence[FSM]) -> Sequence[FSM]:
@@ -144,7 +152,9 @@ class Decode:
             return cls.looper(inputs[1:], outputs)
         if fsm.status == Status.DONE:
             return cls.looper(inputs[1:], (*outputs, fsm))
-        return cls.looper((*inputs[1:], *cls.explode(fsm)), outputs)
+        if fsm.status == Status.ONE:
+            return cls.looper((*inputs[1:], fsm.transform()), outputs)
+        return cls.looper((*inputs[1:], *fsm.explode()), outputs)
 
     def solution(self, text: str):
         fsm_seq = self.looper((FSM(text, ()), ), ())
@@ -162,8 +172,6 @@ if __name__ == '__main__':
     exp_4 = 1
 
     decode = Decode()
-
-    # print(decode.explode(FSM(ipt_1, ())))
 
     assert decode.solution(ipt_1) == exp_1
     assert decode.solution(ipt_2) == exp_2

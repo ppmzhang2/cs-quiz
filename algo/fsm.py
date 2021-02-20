@@ -20,44 +20,29 @@ constains:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, unique
 from typing import Optional, Tuple
 
 
-class AlphabetPhase(Enum):
-    First = 1
-    Middle = 2
-    Last = 3
-    Invalid = 4
-
-    @property
-    def is_last(self):
-        return self == type(self).Last
-
-    def next_phase(self) -> AlphabetPhase:
-        assert not self.is_last
-        if self == type(self).First:
-            return type(self).Middle
-        return type(self).Last
-
-
+@unique
 class Phase(Enum):
-    First = 1
-    Second = 2
-    Third = 3
-    Invalid = 4
+    FIRST = 1
+    SECOND = 2
+    THIRD = 3
+    INVALID = 4
 
 
+@unique
 class Status(Enum):
-    First = 1
-    Second = 2
-    Third = 3
-    Finished = 4
-    Invalid = 5
-    Restart = 6
+    FIRST = 1
+    SECOND = 2
+    THIRD = 3
+    DONE = 4
+    INVALID = 5
+    RESTART = 6
 
 
-@dataclass
+@dataclass(frozen=True)
 class FSM:
     char: str
     first_phase_length: int
@@ -69,12 +54,12 @@ class FSM:
     def phase(self) -> Phase:
         # how to set the FSM invalid
         if self.first_phase_length <= 0:
-            return Phase.Invalid
+            return Phase.INVALID
         if self.second_phase_length == 0 and self.third_phase_length == 0:
-            return Phase.First
+            return Phase.FIRST
         if self.third_phase_length == 0:
-            return Phase.Second
-        return Phase.Third
+            return Phase.SECOND
+        return Phase.THIRD
 
     @property
     def valid_length(self) -> str:
@@ -82,13 +67,13 @@ class FSM:
         if self.second_phase_length > self.first_phase_length:
             return -1
         # in the first phase
-        if self.phase == Phase.First:
+        if self.phase == Phase.FIRST:
             return self.first_phase_length
         # in the second phase
-        if self.phase == Phase.Second:
+        if self.phase == Phase.SECOND:
             return self.second_phase_length
         # in the third phase
-        if self.phase == Phase.Third:
+        if self.phase == Phase.THIRD:
             return self.second_phase_length
 
         raise ValueError('invalid value')
@@ -102,44 +87,44 @@ class FSM:
         if self.no_remaining:
             return True
         char = self.remaining[0]
-        if char not in (self.char, Solution.next_char(self.char)):
+        if char not in (self.char, BeautifulString.next_char(self.char)):
             return True
 
         return False
 
     @property
     def status(self) -> Status:
-        if (self.phase == Phase.Third
+        if (self.phase == Phase.THIRD
                 and self.third_phase_length == self.valid_length):
-            return Status.Finished
-        if (self.phase == Phase.First and not self.no_remaining
+            return Status.DONE
+        if (self.phase == Phase.FIRST and not self.no_remaining
                 and self.invalid_char):
-            return Status.Restart
-        if (self.phase == Phase.Invalid or self.valid_length == -1
+            return Status.RESTART
+        if (self.phase == Phase.INVALID or self.valid_length == -1
                 or self.invalid_char):
-            return Status.Invalid
-        if self.phase == Phase.First:
-            return Status.First
-        if self.phase == Phase.Second:
-            return Status.Second
-        if (self.phase == Phase.Third
+            return Status.INVALID
+        if self.phase == Phase.FIRST:
+            return Status.FIRST
+        if self.phase == Phase.SECOND:
+            return Status.SECOND
+        if (self.phase == Phase.THIRD
                 and self.third_phase_length < self.valid_length):
-            return Status.Third
+            return Status.THIRD
 
         raise ValueError('invalid value')
 
-    def explode(self) -> Tuple[FSM, ...]:
+    def explode(self) -> Tuple[FSM, ...]:  #pylint: disable=too-many-return-statements
         assert self.status in (
-            Status.First,
-            Status.Second,
-            Status.Third,
-            Status.Restart,
+            Status.FIRST,
+            Status.SECOND,
+            Status.THIRD,
+            Status.RESTART,
         )
         char = self.remaining[0]
         remaining = self.remaining[1:]
-        if self.status == Status.Restart:
+        if self.status == Status.RESTART:
             return (FSM(char, 1, 0, 0, remaining), )
-        if self.status == Status.First:
+        if self.status == Status.FIRST:
             if self.char == char:
                 return (FSM(
                     self.char,
@@ -158,7 +143,7 @@ class FSM:
                     remaining,
                 ),
             )
-        if self.status == Status.Second:
+        if self.status == Status.SECOND:
             if self.char == char:
                 return (FSM(
                     self.char,
@@ -177,7 +162,7 @@ class FSM:
                     remaining,
                 ),
             )
-        if self.status == Status.Third:
+        if self.status == Status.THIRD:
             if self.char == char:
                 return (FSM(
                     self.char,
@@ -195,7 +180,7 @@ class FSM:
         raise ValueError('invalid value')
 
 
-class Solution:
+class BeautifulString:
     @staticmethod
     def next_char(c: str) -> str:
         ord_a = ord('a')
@@ -212,9 +197,9 @@ class Solution:
         if not inputs:
             return None
         fsm = inputs[0]
-        if fsm.status == Status.Invalid:
+        if fsm.status == Status.INVALID:
             return cls.looper(inputs[1:])
-        if fsm.status == Status.Finished:
+        if fsm.status == Status.DONE:
             return fsm
         return cls.looper((*fsm.explode(), *inputs[1:]))
 
@@ -250,26 +235,19 @@ if __name__ == '__main__':
     ipt_9 = 'fuiaabcsn'
     exp_9 = True
 
-    s = Solution()
+    bs = BeautifulString()
 
-    assert s.next_char('b') == 'c'
-    assert s.next_char('v') == 'w'
-    assert s.next_char('z') == ''
-    assert s.next_char('') == ''
+    assert bs.next_char('b') == 'c'
+    assert bs.next_char('v') == 'w'
+    assert bs.next_char('z') == ''
+    assert bs.next_char('') == ''
 
-    # phase = AlphabetPhase.First
-    # print(phase.next_phase().is_last)
-    # print(phase.next_phase().next_phase().is_last)
-
-    # fsm = FSM('a', AlphabetPhase.First, 1, 0, 0, 'abbc')
-    # print(fsm.explode()[0].explode()[1].explode()[0].explode())
-
-    assert s.solution(ipt_1) == exp_1
-    assert s.solution(ipt_2) == exp_2
-    assert s.solution(ipt_3) == exp_3
-    assert s.solution(ipt_4) == exp_4
-    assert s.solution(ipt_5) == exp_5
-    assert s.solution(ipt_6) == exp_6
-    assert s.solution(ipt_7) == exp_7
-    assert s.solution(ipt_8) == exp_8
-    assert s.solution(ipt_9) == exp_9
+    assert bs.solution(ipt_1) == exp_1
+    assert bs.solution(ipt_2) == exp_2
+    assert bs.solution(ipt_3) == exp_3
+    assert bs.solution(ipt_4) == exp_4
+    assert bs.solution(ipt_5) == exp_5
+    assert bs.solution(ipt_6) == exp_6
+    assert bs.solution(ipt_7) == exp_7
+    assert bs.solution(ipt_8) == exp_8
+    assert bs.solution(ipt_9) == exp_9

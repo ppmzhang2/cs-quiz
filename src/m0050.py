@@ -19,28 +19,29 @@ Constraints:
 * -2^31 <= n <= 2^31-1
 * -10^4 <= x^n <= 10^4
 """
-from typing import NamedTuple, Sequence, Tuple
+from __future__ import annotations
+
+from dataclasses import dataclass
+from enum import Enum, unique
+from typing import Sequence, Tuple
 
 
-class Middleware(NamedTuple):
+@unique
+class Status(Enum):
+    INIT = 0
+    DISASSEMBLE = 1
+    ASSEMBLE = 2
+    DONE = 3
+
+
+@dataclass(frozen=True)
+class FSM:
     base: float
     new_base: float
     negative: bool
-    facter: int
-    remainers: Sequence[int]
+    factor: int
+    powers: Sequence[int]
 
-    @property
-    def status(self) -> int:
-        if self.facter > 1 and not self.remainers:
-            return 0
-        if self.facter > 1:
-            return 1
-        if self.facter == 1 and len(self.remainers) >= 1:
-            return 2
-        return 3
-
-
-class Pow:
     @staticmethod
     def naive_pow(base: float, power: int) -> float:
         if power == 2:
@@ -53,45 +54,57 @@ class Pow:
 
     @staticmethod
     def parameterize(n: int) -> Tuple[int, int]:
-        facter = n // 2
-        remainer = n - 2 * facter
-        return facter, remainer
+        factor = n // 2
+        remainer = n - 2 * factor
+        return factor, remainer
 
-    def disassemble(self, mw: Middleware) -> Middleware:
-        assert mw.status <= 1
-        new_facter, new_remainer = self.parameterize(mw.facter)
-        return Middleware(
-            mw.base,
-            mw.new_base,
-            mw.negative,
-            new_facter,
-            (new_remainer, *mw.remainers),
+    @property
+    def status(self) -> Status:
+        if self.factor > 1 and not self.powers:
+            return Status.INIT
+        if self.factor > 1:
+            return Status.DISASSEMBLE
+        if self.factor == 1 and len(self.powers) >= 1:
+            return Status.ASSEMBLE
+        return Status.DONE
+
+    def disassemble(self) -> FSM:
+        assert self.status in (Status.INIT, Status.DISASSEMBLE)
+        new_factor, new_power = self.parameterize(self.factor)
+        return FSM(
+            self.base,
+            self.new_base,
+            self.negative,
+            new_factor,
+            (new_power, *self.powers),
         )
 
-    def assemble(self, mw: Middleware) -> Middleware:
-        assert mw.status >= 2
-        remainer = mw.remainers[0]
-        new_base = (self.naive_pow(mw.new_base, 2) *
-                    self.naive_pow(mw.base, remainer))
-        return Middleware(
-            mw.base,
+    def assemble(self) -> FSM:
+        assert self.status == Status.ASSEMBLE
+        power = self.powers[0]
+        new_base = (self.naive_pow(self.new_base, 2) *
+                    self.naive_pow(self.base, power))
+        return FSM(
+            self.base,
             new_base,
-            mw.negative,
-            mw.facter,
-            mw.remainers[1:],
+            self.negative,
+            self.factor,
+            self.powers[1:],
         )
 
-    def looper(self, mw: Middleware) -> Middleware:
-        if mw.status == 3:
+
+class Pow:
+    def looper(self, mw: FSM) -> FSM:
+        if mw.status == Status.DONE:
             return mw
-        if mw.status <= 1:
-            return self.looper(self.disassemble(mw))
-        if mw.status >= 2:
-            return self.looper(self.assemble(mw))
+        if mw.status in (Status.INIT, Status.DISASSEMBLE):
+            return self.looper(mw.disassemble())
+        if mw.status == Status.ASSEMBLE:
+            return self.looper(mw.assemble())
         raise ValueError('Unexpected middleware')
 
     def solution(self, x: float, n: int):
-        mw = Middleware(x, x, n < 0, abs(n), ())
+        mw = FSM(x, x, n < 0, abs(n), ())
         mw_ = self.looper(mw)
         if mw_.negative:
             return 1 / mw_.new_base

@@ -1,4 +1,6 @@
 """pow-x-n
+TAG: math
+
 Implement pow(x, n), which calculates x raised to the power n (i.e. xn).
 
 Example 1:

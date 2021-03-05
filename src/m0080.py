@@ -40,4 +40,55 @@ Constraints:
 * -104 <= nums[i] <= 104
 * nums is sorted in ascending order.
 """
-# TODO
+from collections import defaultdict
+from typing import Sequence
+
+
+class HashTable:
+    __slots__ = ['_dd']
+
+    @staticmethod
+    def zero():
+        return 0
+
+    def __init__(self):
+        self._dd = defaultdict(self.zero)
+
+    def __str__(self):
+        return self._dd.__str__()
+
+    def add(self, key: int):
+        value = self._dd[key]
+        if value in (0, 1):
+            self._dd[key] += 1
+
+    @property
+    def seq(self):
+        items = self._dd.items()
+        res = []
+        for k, v in items:
+            res += [k] * v
+
+        return res
+
+    @property
+    def seq_length(self):
+        return sum(self._dd.values())
+
+
+class RemoveDuplicates:
+    @staticmethod
+    def solution(seq: Sequence):
+        ht = HashTable()
+        for i in seq:
+            ht.add(i)
+
+        return ht.seq
+
+
+if __name__ == '__main__':
+    ipt_1 = [0, 0, 1, 1, 1, 1, 2, 3, 3]
+    exp_1 = [0, 0, 1, 1, 2, 3, 3]
+
+    rd = RemoveDuplicates()
+    assert exp_1 == rd.solution(ipt_1)

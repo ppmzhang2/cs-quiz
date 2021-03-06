@@ -1,4 +1,6 @@
 """construct binary tree from pre-order and in-order traversal
+TAG: tree, zipper
+
 Given pre-order and in-order traversal of a tree, construct the binary tree.
 
 Note:

@@ -1,4 +1,6 @@
 """Validate Binary Search Tree
+TAG: dynamic-programming
+
 Given the root of a binary tree, determine if it is a valid binary search tree
 (BST).
 
@@ -23,3 +25,4 @@ Constraints:
 * The number of nodes in the tree is in the range [1, 104].
 * -2^31 <= Node.val <= 2^31 - 1
 """
+# TODO

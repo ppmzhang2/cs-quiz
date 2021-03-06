@@ -1,5 +1,5 @@
 """Binary Tree Inorder Traversal
-TAG: hash-table
+TAG: hash-table, stack
 
 Given the root of a binary tree, return the in-order traversal of its nodes'
 values.

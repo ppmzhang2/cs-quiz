@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Swap Nodes in Pairs
 TAG: linked-list
 

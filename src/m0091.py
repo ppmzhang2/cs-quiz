@@ -1,5 +1,5 @@
 """Decode Ways
-TAG: dynamic-programming
+TAG: dynamic-programming, tree
 
 A message containing letters from A-Z can be encoded into numbers using the
 following mapping:

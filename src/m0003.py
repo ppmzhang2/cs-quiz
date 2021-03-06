@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 """Longest Substring Without Repeating Characters
+TAG: dynamic-programming, hash-table, string
 
 Given a string, find the length of the longest substring without repeating
 characters.

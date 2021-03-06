@@ -1,5 +1,6 @@
-# -*- coding: utf-8 -*-
 """Divide Two Integers
+TAG: binary-search, math
+
 Given two integers dividend and divisor, divide two integers without using
 multiplication, division and mod operator.
 
@@ -11,10 +12,12 @@ Example 1:
 
 Input: dividend = 10, divisor = 3
 Output: 3
+
 Example 2:
 
 Input: dividend = 7, divisor = -3
 Output: -2
+
 Note:
 
 Both dividend and divisor will be 32-bit signed integers.

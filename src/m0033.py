@@ -1,4 +1,6 @@
 """search in rotated-sorted array
+TAG: binary-search
+
 https://leetcode-cn.com/problems/search-in-rotated-sorted-array/
 
 You are given an integer array nums sorted in ascending order (with distinct
@@ -29,7 +31,6 @@ All values of nums are unique.
 nums is guaranteed to be rotated at some pivot.
 -10^4 <= target <= 10^4
 """
-
 from typing import Sequence, Tuple
 
 

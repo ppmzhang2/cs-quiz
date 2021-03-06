@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Remove Nth Node from End of List
 TAG: linked-list
 

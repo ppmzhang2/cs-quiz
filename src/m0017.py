@@ -1,5 +1,6 @@
-# -*- coding: utf-8 -*-
 """Letter Combinations of a Phone Number
+TAG: back-tracking
+
 Given a string containing only numbers from 2 to 9, return all the alphabetic
 combinations. The mapping from letters to numbers is the same with phone keys.
 

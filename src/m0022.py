@@ -1,5 +1,6 @@
-# -*- coding: utf-8 -*-
 """Generate Parentheses
+TAG: string
+
 n represents number of parentheses, design a function to generate all VALID
 parentheses combination
 

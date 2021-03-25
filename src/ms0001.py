@@ -1,22 +1,3 @@
-"""FSM
-if a string contains three or more groups of ascending characters with each
-group has the same length, we call it a beautiful string (2014 MS)
-
-* beautiful strings: abc, cde, aabbcc, aaabbbccc
-* non-beautiful strings: abd, cba, aabbc, zab
-
-input:
-
-1. the first line is the number of cases
-2. every line after the first line is a number and a string
-3. the number is the length of the string, which is less than 10 MB
-
-output: YES / NO
-
-constains:
-
-1. input only contains non-capital characters
-"""
 from __future__ import annotations
 
 from dataclasses import dataclass

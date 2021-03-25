@@ -159,6 +159,11 @@ My leetcode python solutions based on [azl397985856's project](https://github.co
 - [1631.Path With Minimum Effort](./src/m1631.py)
 - [1658.Minimum Operations to Reduce X to Zero](./src/m1658.py)
 
+### Uncovered
+
+- [MS: Beautiful String](./quiz/ms0001.md)
+- [Algoexpert: Best Suited Apartment](./quiz/ae0001.md)
+
 ## Reference
 
 * https://github.com/azl397985856/leetcode

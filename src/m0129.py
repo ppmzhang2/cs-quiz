@@ -1,36 +1,78 @@
-"""Sum Root to Leaf Numbers
-Given a binary tree containing digits from 0-9 only, each root-to-leaf path
-could represent a number.
+from __future__ import annotations
 
-An example is the root-to-leaf path 1->2->3 which represents the number 123.
+from dataclasses import dataclass
+from enum import IntEnum, unique
+from typing import Optional, Sequence, Tuple
 
-Find the total sum of all root-to-leaf numbers.
 
-Note: A leaf is a node with no children.
+@dataclass(frozen=True)
+class Tree:
+    node: int
+    subs: Tuple[Tree, ...] = ()
 
-Example:
+    @property
+    def leaf(self) -> bool:
+        if not self.subs:
+            return True
+        return False
 
-Input: [1,2,3]
-    1
-   / \
-  2   3
-Output: 25
-Explanation:
-The root-to-leaf path 1->2 represents the number 12.
-The root-to-leaf path 1->3 represents the number 13.
-Therefore, sum = 12 + 13 = 25.
 
-Example 2:
-Input: [4,9,0,5,1]
-    4
-   / \
-  9   0
- / \
-5   1
-Output: 1026
-Explanation:
-The root-to-leaf path 4->9->5 represents the number 495.
-The root-to-leaf path 4->9->1 represents the number 491.
-The root-to-leaf path 4->0 represents the number 40.
-Therefore, sum = 495 + 491 + 40 = 1026.
-"""
+@unique
+class State(IntEnum):
+    DOING = 0
+    DONE = 1
+
+
+@dataclass(frozen=True)
+class FSM:
+    seq: Tuple[int, ...]
+    tree: Optional[Tree]
+
+    @property
+    def state(self) -> State:
+        if self.tree is None:
+            return State.DONE
+        return State.DOING
+
+    @property
+    def num(self) -> int:
+        if not self.seq:
+            return 0
+        return int(''.join((str(i) for i in self.seq)))
+
+    def explode(self) -> Tuple[FSM, ...]:
+        assert self.state == State.DOING
+        if self.tree.leaf:
+            return (FSM((*self.seq, self.tree.node), None), )
+        return tuple(
+            (FSM((*self.seq, self.tree.node), tr) for tr in self.tree.subs))
+
+
+class SumRootToLeaf:
+    @classmethod
+    def looper(cls, inputs: Sequence[FSM],
+               outputs: Sequence[int]) -> Sequence[int]:
+        while True:
+            if not inputs:
+                return outputs
+            fsm = inputs[0]
+            if fsm.state == State.DONE:
+                inputs, outputs = inputs[1:], (*outputs, fsm.num)
+            else:
+                inputs = (*inputs[1:], *fsm.explode())
+
+    def solution(self, tree: Tree):
+        fsm = FSM((), tree)
+        fsm_seq = self.looper((fsm, ), ())
+        return sum(fsm_seq)
+
+
+if __name__ == '__main__':
+    ipt_1 = Tree(1, (Tree(2), Tree(3)))
+    exp_1 = 25
+    ipt_2 = Tree(4, (Tree(9, (Tree(5), Tree(1))), Tree(0)))
+    exp_2 = 1026
+
+    srtl = SumRootToLeaf()
+    assert exp_1 == srtl.solution(ipt_1)
+    assert exp_2 == srtl.solution(ipt_2)

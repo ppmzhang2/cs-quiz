@@ -74,7 +74,7 @@ My leetcode python solutions based on [azl397985856's project](https://github.co
 - [0103.binary-tree-zigzag-level-order-traversal](./src/m0103.py)
 - [0105.Construct Binary Tree from Pre-order and In-order Traversal](./quiz/m0105.md)
 - [0113.Path-Sum-II](./src/m0113.py)
-- [0129.Sum-Root-to-Leaf-Numbers](./src/m0129.py)
+- [0129.Sum-Root-to-Leaf-Numbers](./quiz/m0129.md)
 - [0130.Surrounded-Regions](./src/m0130.py)
 - [0131.Palindrome-Partitioning](./src/m0131.py)
 - [0139.Word-Break](./src/m0139.py)

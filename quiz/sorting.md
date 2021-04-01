@@ -5,7 +5,7 @@
 Divide and conquer, sorting by merging from the smallest part after dividing.
 
 1. [with-splitting](../src/merge_sort.py)
-2. [without-splitting](../src/merge_sort_ya.py)
+2. [without-splitting](../src/merge_sort_fsm.py)
 
 ## Quick Sort
 

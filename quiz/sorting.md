@@ -13,6 +13,16 @@ Divide and conquer, similar to merge sort but with a top-down method instead of 
 
 * [fsm](../src/quick_sort.py)
 
+## Heap Sort
+
+1. create a min-max heap `H[0, 1, ..., n-1]`
+2. heapify from the last non-leaf node to the top
+3. swap top and bottom
+4. reduce the heap size and heapify at the top
+4. start from step 3
+
+* [heap](../src/heap_sort.py)
+
 ## Reference
 
 1. https://zhuanlan.zhihu.com/p/95080265

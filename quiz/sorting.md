@@ -23,6 +23,12 @@ Divide and conquer, similar to merge sort but with a top-down method instead of 
 
 * [heap](../src/heap_sort.py)
 
+## Radix Sort
+
+In each iteration, it distributes elements into buckets according to their radix and re-arrange their order by their radix.
+
+* [radix-sort](../src/radix_sort.py)
+
 ## Reference
 
 1. https://zhuanlan.zhihu.com/p/95080265

@@ -15,7 +15,7 @@ My leetcode python solutions based on [azl397985856's project](https://github.co
 - [0125.valid-palindrome](./src/e0125.py)
 - [0136.single-number](./src/e0136.py)
 - [0155.min-stack](./src/e0155.py)
-- [0167.two-sum-ii-input-array-is-sorted](./src/e0167.py)
+- [0167.two-sum-ii-input-array-is-sorted](./quiz/e0167.md)
 - [0169.majority-element](./src/e0169.py)
 - [0172.factorial-trailing-zeroes](./src/e0172.py)
 - [0190.reverse-bits](./src/e0190.py)

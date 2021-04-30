@@ -1,42 +1,19 @@
-# -*- coding: utf-8 -*-
-"""Two Sum ii: Input Array is Sorted
-
-Given an array of integers that is already sorted in ascending order, find two
-numbers such that they add up to a specific target number.
-
-The function twoSum should return indices of the two numbers such that they
-add up to the target, where index1 must be less than index2.
-
-Note:
-
-Your returned answers (both index1 and index2) are not zero-based.
-You may assume that each input would have exactly one solution and you may
-not use the same element twice.
-Example:
-
-Input: numbers = [2,7,11,15], target = 9
-Output: [1,2]
-Explanation: The sum of 2 and 7 is 9. Therefore index1 = 1, index2 = 2.
-
-"""
-
 from typing import Tuple
 
 
-class TwoSumSorted(object):
+class TwoSumSorted:
     @staticmethod
     def solution(arr: Tuple[int, ...], target: int):
         def helper(arr_: Tuple[int, ...], target_: int, idx_beg: int,
                    idx_end: int, rec: Tuple[Tuple[int, int], ...]):
             if idx_beg >= idx_end:
                 return rec
-            elif arr[idx_beg] + arr[idx_end] < target:
+            if arr[idx_beg] + arr[idx_end] < target:
                 return helper(arr_, target_, idx_beg + 1, idx_end, rec)
-            elif arr[idx_beg] + arr[idx_end] > target:
+            if arr[idx_beg] + arr[idx_end] > target:
                 return helper(arr_, target_, idx_beg, idx_end - 1, rec)
-            else:
-                return helper(arr_, target_, idx_beg + 1, idx_end - 1,
-                              rec + ((idx_beg, idx_end), ))
+            return helper(arr_, target_, idx_beg + 1, idx_end - 1,
+                          rec + ((idx_beg, idx_end), ))
 
         return helper(arr, target, 0, len(arr) - 1, ())
 

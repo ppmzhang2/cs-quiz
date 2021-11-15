@@ -162,6 +162,7 @@ My leetcode python solutions based on [azl397985856's project](https://github.co
 ### Project Euler
 
 - [Multiples of 3 or 5](./quiz/euler0001.md)
+- [Even Fibonacci numbers](./quiz/euler0002.md)
 
 ### Uncovered
 

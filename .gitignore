@@ -3,6 +3,8 @@ config.py
 
 # C extensions
 *.so
+*.o
+*.out
 
 # Packages
 *.egg

@@ -159,6 +159,10 @@ My leetcode python solutions based on [azl397985856's project](https://github.co
 - [1631.Path With Minimum Effort](./src/m1631.py)
 - [1658.Minimum Operations to Reduce X to Zero](./src/m1658.py)
 
+### Project Euler
+
+- [Multiples of 3 or 5](./quiz/euler0001.md)
+
 ### Uncovered
 
 - [MS: Beautiful String](./quiz/ms0001.md)

@@ -161,8 +161,10 @@ My leetcode python solutions based on [azl397985856's project](https://github.co
 
 ### Project Euler
 
-- [Multiples of 3 or 5](./quiz/euler0001.md)
-- [Even Fibonacci numbers](./quiz/euler0002.md)
+- [0001.Multiples of 3 or 5](./quiz/euler0001.md)
+- [0002.Even Fibonacci numbers](./quiz/euler0002.md)
+- [0003.Largest Prime Factor](./quiz/euler0003.md)
+- [0096.Su Doku](./quiz/euler0096.md)
 
 ### Uncovered
 

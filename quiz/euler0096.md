@@ -46,4 +46,4 @@ By solving all fifty puzzles find the sum of the 3-digit numbers found in the to
 
 ## Solution
 
-- [python FSM solution](./src/euler0096.py)
+- [python FSM solution](../src/euler0096.py)

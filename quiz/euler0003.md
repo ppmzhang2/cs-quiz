@@ -12,3 +12,4 @@ What is the largest prime factor of the number 600851475143?
 ## Solution
 
 - [c-program](../src/euler0003.c)
+- [c++-program](../src/euler0003.cpp)

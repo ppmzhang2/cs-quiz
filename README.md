@@ -168,6 +168,7 @@ My leetcode python solutions based on [azl397985856's project](https://github.co
 
 ### Uncovered
 
+- [Convert Chinese Characters to Numbers](./quiz/chinese2num.md)
 - [MS: Beautiful String](./quiz/ms0001.md)
 - [Algoexpert: Best Suited Apartment](./quiz/ae0001.md)
 - [LRU](./quiz/lru.md)

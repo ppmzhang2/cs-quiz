@@ -134,6 +134,9 @@ class FSM:
             return State.MERGE_BASIC
         raise ValueError('value error')
 
+
+class Converter:
+    """collection of converter functions"""
     @staticmethod
     def string_parse(ch: str) -> List[Union[int, Unit]]:
         """from chinese string to sequence of integer of units"""
@@ -142,13 +145,10 @@ class FSM:
         return list(
             filter(lambda x: x != 0, [_MAP_FROM_CH.get(c) for c in seq_ch]))
 
-
-class Converter:
-    """converter functions"""
-    @staticmethod
-    def init_fsm(ch: str):
+    @classmethod
+    def init_fsm(cls, ch: str):
         """initiate FSM instance"""
-        seq = FSM.string_parse(ch)
+        seq = cls.string_parse(ch)
         return FSM(
             unit=Unit.INF,
             basic=BasicStrNum(digit=None, unit=None),

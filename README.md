@@ -1,10 +1,23 @@
-# LeetCode
+# CS Quiz
 
-My leetcode python solutions based on [azl397985856's project](https://github.com/azl397985856/leetcode)
+Inspired by [azl397985856's project](https://github.com/azl397985856/leetcode)
 
-## Quiz
+## Topics
 
-### Easy
+- [Linked List](./quiz/linkedlist.md)
+- [Convert Chinese Characters to Numbers](./quiz/chinese2num.md)
+- [MS: Beautiful String](./quiz/ms0001.md)
+- [Algoexpert: Best Suited Apartment](./quiz/ae0001.md)
+- [Sorting](./quiz/sorting.md)
+
+## Project Euler
+
+- [0001.Multiples of 3 or 5](./quiz/euler0001.md)
+- [0002.Even Fibonacci numbers](./quiz/euler0002.md)
+- [0003.Largest Prime Factor](./quiz/euler0003.md)
+- [0096.Su Doku](./quiz/euler0096.md)
+
+## Misc. - Easy
 
 - [0020.Valid Parentheses](./src/e0020.py)
 - [0026.remove-duplicates-from-sorted-array](./src/e0026.py)
@@ -21,8 +34,6 @@ My leetcode python solutions based on [azl397985856's project](https://github.co
 - [0190.reverse-bits](./src/e0190.py)
 - [0191.number-of-1-bits](./src/e0191.py)
 - [0198.house-robber](./src/e0198.py)
-- [0203.remove-linked-list-elements](./src/e0203.py)
-- [0206.reverse-linked-list](./src/e0206.py)
 - [0219.contains-duplicate-ii](./src/e0219.py)
 - [0226.invert-binary-tree](./src/e0226.py)
 - [0232.implement-queue-using-stacks](./src/e0232.py)
@@ -33,17 +44,14 @@ My leetcode python solutions based on [azl397985856's project](https://github.co
 - [0437.path-sum-iii](./src/e0437.py)
 - [0575.distribute-candies](./src/e0575.py)
 
-### Medium
+## Misc. - Medium
 
-- [0002.add-two-numbers](./src/m0002.py)
 - [0003.longest-substring-without-repeating-characters](./src/m0003.py)
 - [0005.longest-palindromic-substring](./src/m0005.py)
 - [0011.container-with-most-water](./src/m0011.py)
 - [0015.three-sum](./src/m0015.py)
 - [0017.letter-combinations-of-a-phone-number](./src/m0017.py)
-- [0019.remove-nth-node-from-end-of-list](./src/m0019.py)
 - [0022.generate-parentheses](./src/m0022.py)
-- [0024.swap-nodes-in-pairs](./src/m0024.py)
 - [0029.divide-two-integers](./src/m0029.py)
 - [0031.next-permutation](./src/m0031.py)
 - [0033.search-in-rotated-sorted-array](./src/m0033.py)
@@ -55,17 +63,14 @@ My leetcode python solutions based on [azl397985856's project](https://github.co
 - [0049.group-anagrams](./src/m0049.py)
 - [0050.pow-x-n](./quiz/m0050.md)
 - [0060.Permutation Sequence](./src/m0060.py)
-- [0061.Rotate-List](./src/m0061.py)
 - [0062.Unique-Paths](./src/m0062.py)
 - [0073.Set-Matrix-Zeroes](./src/m0073.py)
 - [0075.Sort-Colors](./src/m0075.py)
 - [0078.Subsets](./src/m0078.py)
 - [0079.Word-Search](./src/m0079.py)
 - [0080.Remove-Duplicates-from-Sorted-Array-II](./src/m0080.py)
-- [0086.Partition-List](./src/m0086.py)
 - [0090.Subsets-II](./src/m0090.py)
 - [0091.Decode-Ways](./src/m0091.py)
-- [0092.Reverse-Linked-List-II](./src/m0092.py)
 - [0094.Binary-Tree-Inorder-Traversal](./src/m0094.py)
 - [0095.Unique-Binary-Search-Trees-II](./src/m0095.py)
 - [0096.unique-binary-search-trees](./src/m0096.py)
@@ -79,7 +84,6 @@ My leetcode python solutions based on [azl397985856's project](https://github.co
 - [0131.Palindrome-Partitioning](./src/m0131.py)
 - [0139.Word-Break](./src/m0139.py)
 - [0144.Binary-Tree-Preorder-Traversal](./quiz/m0144.md)
-- [0147.Insertion-Sort-List](./quiz/m0147.md)
 - [0150.Evaluate-Reverse-Polish-Notation](./src/m0150.py)
 - [0152.maximum-product-subarray](./src/m0152.py)
 - [0199.Binary-Tree-Right-Side-View](./src/m0199.py)
@@ -99,7 +103,6 @@ My leetcode python solutions based on [azl397985856's project](https://github.co
 - [0279.Perfect Squares](./src/m0279.py)
 - [0309.Best Time to Buy and Sell Stock with Cooldown](./src/m0309.py)
 - [0322.Coin Change](./src/m0322.py)
-- [0328.Odd Even Linked List](./src/m0328.py)
 - [0334.Increasing Triplet Subsequence](./src/m0334.py)
 - [0337.House Robber III](./src/m0337.py)
 - [0343.Integer Break](./src/m0343.py)
@@ -108,7 +111,6 @@ My leetcode python solutions based on [azl397985856's project](https://github.co
 - [0380.Insert Delete GetRandom O(1)](./src/m0380.py)
 - [0394.Decode String (91)](./src/m0394.py)
 - [0416.Partition Equal Subset Sum](./src/m0416.py)
-- [0445.Add Two Numbers II](./src/m0445.py)
 - [0454.4Sum II](./src/m0454.py)
 - [0464.Can I Win](./src/m0464.py)
 - [0494.Target Sum](./src/m0494.py)
@@ -138,7 +140,6 @@ My leetcode python solutions based on [azl397985856's project](https://github.co
 - [1011.Capacity To Ship Packages Within D Days](./src/m1011.py)
 - [1014.Best Sightseeing Pair](./src/m1014.py)
 - [1015.Smallest Integer Divisible by K](./src/m1015.py)
-- [1019.Next Greater Node In Linked List](./src/m1019.py)
 - [1020.Number of Enclaves](./src/m1020.py)
 - [1023.Camelcase Matching](./src/m1023.py)
 - [1031.Maximum Sum of Two Non-Overlapping Subarrays](./src/m1031.py)
@@ -158,22 +159,3 @@ My leetcode python solutions based on [azl397985856's project](https://github.co
 - [1574.Shortest Subarray to be Removed to Make Array Sorted](./src/m1574.py)
 - [1631.Path With Minimum Effort](./src/m1631.py)
 - [1658.Minimum Operations to Reduce X to Zero](./src/m1658.py)
-
-### Project Euler
-
-- [0001.Multiples of 3 or 5](./quiz/euler0001.md)
-- [0002.Even Fibonacci numbers](./quiz/euler0002.md)
-- [0003.Largest Prime Factor](./quiz/euler0003.md)
-- [0096.Su Doku](./quiz/euler0096.md)
-
-### Uncovered
-
-- [Convert Chinese Characters to Numbers](./quiz/chinese2num.md)
-- [MS: Beautiful String](./quiz/ms0001.md)
-- [Algoexpert: Best Suited Apartment](./quiz/ae0001.md)
-- [LRU](./quiz/lru.md)
-- [Sorting](./quiz/sorting.md)
-
-## Reference
-
-* https://github.com/azl397985856/leetcode

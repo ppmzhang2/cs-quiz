@@ -1,5 +1,4 @@
 """Add Two Numbers II
-TAG: linked-list
 
 You are given two non-empty linked lists representing two non-negative
 integers. The most significant digit comes first and each of their nodes

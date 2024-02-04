@@ -1,5 +1,4 @@
 """Swap Nodes in Pairs
-TAG: linked-list
 
 Given a linked list, swap every two adjacent nodes and return its head.
 

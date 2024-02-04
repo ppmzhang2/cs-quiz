@@ -1,5 +1,4 @@
 """Reverse Linked List II
-TAG: linked-list
 
 Reverse a linked list from position m to n. Do it in one-pass.
 

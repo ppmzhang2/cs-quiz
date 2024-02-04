@@ -1,6 +1,4 @@
-"""Insertion Sort List with Zipper
-TAG: linked-list
-"""
+"""Insertion Sort List with Zipper."""
 from __future__ import annotations
 
 from dataclasses import dataclass

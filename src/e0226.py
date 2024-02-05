@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 """Invert Binary Tree
-TAG: binary-tree
 
 Invert a binary tree.
 

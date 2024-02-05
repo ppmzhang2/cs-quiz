@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 """Maximum Depth of Binary Tree
-TAG: binary-tree
 
 Given a binary tree, find its maximum depth.
 

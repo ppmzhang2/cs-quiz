@@ -16,7 +16,6 @@
 ## Quizzes
 
 - [Rotate List](./m0061.md)
-- [Reverse Linked List](./e0206.md)
 - [LRU](./lru.md)
 - [E0203: Remove Linked List Elements](../src/e0203.py)
 - [M0002: Add-two-numbers](../src/m0002.py)

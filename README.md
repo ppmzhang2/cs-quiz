@@ -6,7 +6,6 @@ Inspired by [azl397985856's project](https://github.com/azl397985856/leetcode)
 
 - [Linked List](./quiz/linkedlist.md)
 - [Binary Tree](./quiz/binarytree.md)
-- [Convert Chinese Characters to Numbers](./quiz/chinese2num.md)
 - [MS: Beautiful String](./quiz/ms0001.md)
 - [Algoexpert: Best Suited Apartment](./quiz/ae0001.md)
 - [Sorting](./quiz/sorting.md)

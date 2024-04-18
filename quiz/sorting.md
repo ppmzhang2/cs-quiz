@@ -1,18 +1,5 @@
 # Sorting
 
-## Merge Sort
-
-Divide and conquer, sorting by merging from the smallest part after dividing.
-
-1. [with-splitting](../src/merge_sort.py)
-2. [without-splitting](../src/merge_sort_fsm.py)
-
-## Quick Sort
-
-Divide and conquer, similar to merge sort but with a top-down method instead of bottom-up: sorting when dividing, and splicing all together finally.
-
-* [fsm](../src/quick_sort.py)
-
 ## Heap Sort
 
 1. create a min-max heap `H[0, 1, ..., n-1]`
